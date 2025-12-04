@@ -165,26 +165,43 @@ class OandaConnector:
         self._validate_connection()
     
     def _load_credentials(self):
-        """Load API credentials from .env file"""
-        env_file = os.path.join(os.path.dirname(__file__), '..', '.env')
+        """Load API credentials based on environment toggle.
         
-        if os.path.exists(env_file):
-            with open(env_file, 'r') as f:
-                for line in f:
-                    if '=' in line and not line.strip().startswith('#'):
-                        key, value = line.strip().split('=', 1)
-                        os.environ[key] = value.strip('"\'')
+        PRACTICE MODE: Uses hard-coded demo credentials (safe for testing)
+        LIVE MODE: Uses hard-coded live credentials (real money!)
         
-        # Get credentials from environment
+        To switch modes: Set RICK_ENV=practice or RICK_ENV=live
+        """
+        # ============================================================
+        # PRACTICE CREDENTIALS (Demo/Paper Trading - No Real Money)
+        # ============================================================
+        PRACTICE_API_TOKEN = "c21c371d6e31bd37c8c5a864333bbf14-8877c54e49b181ef3a99ee6261673207"
+        PRACTICE_ACCOUNT_ID = "101-001-31210531-002"
+        
+        # ============================================================
+        # LIVE CREDENTIALS (Real Money Trading - BE CAREFUL!)
+        # When ready to go live, replace these with your real credentials
+        # ============================================================
+        LIVE_API_TOKEN = None  # <-- PUT YOUR LIVE API TOKEN HERE
+        LIVE_ACCOUNT_ID = None  # <-- PUT YOUR LIVE ACCOUNT ID HERE
+        
+        # ============================================================
+        # TOGGLE: Select credentials based on environment
+        # ============================================================
         if self.environment == "live":
-            self.api_token = os.getenv("OANDA_LIVE_TOKEN")
-            self.account_id = os.getenv("OANDA_LIVE_ACCOUNT_ID")
+            self.api_token = LIVE_API_TOKEN
+            self.account_id = LIVE_ACCOUNT_ID
+            if not self.api_token or not self.account_id:
+                self.logger.error("⚠️  LIVE MODE SELECTED but credentials not configured!")
+                self.logger.error("    Edit brokers/oanda_connector.py and set LIVE_API_TOKEN and LIVE_ACCOUNT_ID")
         else:
-            self.api_token = os.getenv("OANDA_PRACTICE_TOKEN", "your_practice_token_here")
-            self.account_id = os.getenv("OANDA_PRACTICE_ACCOUNT_ID", "101-001-0000000-001")
+            # Practice mode (default - safe)
+            self.api_token = PRACTICE_API_TOKEN
+            self.account_id = PRACTICE_ACCOUNT_ID
         
-        if not self.api_token or self.api_token == "your_practice_token_here":
-            self.logger.warning(f"OANDA {self.environment} token not configured in .env")
+        # Validate credentials are set
+        if not self.api_token:
+            self.logger.warning(f"OANDA {self.environment} token not configured")
         
         if not self.account_id:
             self.logger.warning(f"OANDA {self.environment} account ID not configured")
