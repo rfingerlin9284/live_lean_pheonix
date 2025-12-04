@@ -9,6 +9,7 @@ import os
 import sys
 import json
 import time
+import subprocess
 from pathlib import Path
 from datetime import datetime, timedelta
 
@@ -107,8 +108,6 @@ def check_narration_activity():
 
 def check_engine_process():
     """Check if the trading engine process is running"""
-    import subprocess
-    
     print(f"\n{Colors.BOLD}Engine Process Status:{Colors.ENDC}")
     
     try:

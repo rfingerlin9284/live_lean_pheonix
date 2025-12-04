@@ -74,7 +74,7 @@ def read_upgrade_toggle() -> bool:
         try:
             content = toggle_file.read_text().strip().upper()
             return content in ['LIVE', 'CANARY']
-        except:
+        except (OSError, IOError):
             return False
     return False
 
@@ -89,7 +89,8 @@ def _read_rick_env() -> str:
                     if line.startswith('RICK_ENV='):
                         value = line.split('=', 1)[1].strip().strip('"\'')
                         return value
-        except:
+        except (OSError, IOError) as e:
+            # File read errors - just fall through to default
             pass
     
     # Also check environment variable
@@ -112,7 +113,7 @@ def _get_env_file_path() -> Optional[Path]:
         env_file = this_file.parent.parent / '.env'
         if env_file.exists():
             return env_file
-    except:
+    except (OSError, AttributeError):
         pass
     
     return None
