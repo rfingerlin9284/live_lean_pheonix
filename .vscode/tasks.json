@@ -30,6 +30,34 @@
       "problemMatcher": []
     },
     {
+      "label": "💰 Coinbase Trading Engine (Safe Mode)",
+      "type": "shell",
+      "command": "bash -lc \"RICK_ENV=practice python3 ${workspaceFolder}/coinbase_safe_mode_engine.py\"",
+      "isBackground": true,
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "dedicated",
+        "showReuseMessage": false,
+        "clear": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🔴 Coinbase Trading Engine (LIVE)",
+      "type": "shell",
+      "command": "bash -lc \"RICK_ENV=live python3 ${workspaceFolder}/coinbase_safe_mode_engine.py\"",
+      "isBackground": true,
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "dedicated",
+        "showReuseMessage": false,
+        "clear": false
+      },
+      "problemMatcher": []
+    },
+    {
       "label": "📡 Persistent Monitor (System Watchdog)",
       "type": "shell",
       "command": "bash -c 'while true; do clear; python3 ${workspaceFolder}/system_watchdog.py 2>&1 || echo \"Watchdog error - retrying in 30s\"; sleep 30; done'",
@@ -119,6 +147,19 @@
       "label": "🔍 Verify Engine Scanning",
       "type": "shell",
       "command": "python3 ${workspaceFolder}/verify_scanning.py && read -p 'Press Enter to close...'",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "dedicated",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🔍 Verify Coinbase System",
+      "type": "shell",
+      "command": "python3 ${workspaceFolder}/verify_coinbase.py && read -p 'Press Enter to close...'",
       "presentation": {
         "echo": true,
         "reveal": "always",

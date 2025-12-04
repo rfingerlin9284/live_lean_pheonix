@@ -189,8 +189,11 @@ For the best monitoring experience with auto-refreshing terminals:
 # Quick start guide
 ./quick_start_terminals.sh
 
-# Or manually verify scanning
+# Verify OANDA scanning
 python3 verify_scanning.py
+
+# Verify Coinbase system
+python3 verify_coinbase.py
 ```
 
 **In VSCode**:
@@ -202,7 +205,12 @@ This sets up:
 - **Terminal 1**: System Watchdog (auto-refresh every 30s)
 - **Terminal 2**: Live Narration Feed (auto-refresh every 10s)
 
-See [TERMINAL_SETUP_GUIDE.md](TERMINAL_SETUP_GUIDE.md) for complete documentation.
+**Available Engines**:
+- 🚀 OANDA Trading Engine (Practice/Live) - Forex trading
+- 💰 Coinbase Trading Engine (Safe Mode/Live) - Crypto trading
+
+See [TERMINAL_SETUP_GUIDE.md](TERMINAL_SETUP_GUIDE.md) for OANDA documentation.
+See [COINBASE_SETUP_GUIDE.md](COINBASE_SETUP_GUIDE.md) for Coinbase documentation.
 
 **Environment Toggle** (Practice ↔ Live):
 - Use VSCode task: "⚙️ Toggle Practice/Live Environment"

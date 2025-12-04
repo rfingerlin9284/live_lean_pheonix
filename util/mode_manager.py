@@ -16,7 +16,7 @@ def get_mode_info() -> Dict[str, Any]:
     return {
         'mode': env.upper() if env else 'PRACTICE',
         'api': True if env == 'live' else False,
-        'description': f'OANDA connector in {env} mode'
+        'description': f'Trading connectors in {env} mode'
     }
 
 
