@@ -170,7 +170,7 @@ cat backtest_results/*.json | python3 -m json.tool
 
 ### Master Environment File
 
-`.env` is the **single source of truth**. All updates require:
+`paper_acct_env.env` is the **single source of truth**. All updates require:
 - PIN verification (841921), OR
 - Explicit chat confirmation
 

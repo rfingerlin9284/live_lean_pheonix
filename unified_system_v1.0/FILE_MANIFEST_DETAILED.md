@@ -333,8 +333,8 @@ python3 oanda_trading_engine.py --env practice
 
 ### Credentials
 - ⚠️ Practice API credentials referenced in documentation (demo account only)
-- ⚠️ Live API credentials **NOT INCLUDED** (configure separately in `.env`)
-- ✅ Keep `.env` in `.gitignore`
+- ⚠️ Live API credentials **NOT INCLUDED** (configure separately in `master.env`)
+- ✅ Keep `master.env` in `.gitignore`
 - ✅ Never commit API tokens to version control
 
 ### Charter Protection
@@ -354,7 +354,7 @@ python3 oanda_trading_engine.py --env practice
 
 ### For Trading System Issues
 - Check `narration.jsonl` for event logs
-- Verify credentials in `.env`
+- Verify credentials in `master.env`
 - Run self-tests in `momentum_trailing.py`
 - Validate Charter: `RickCharter.validate()`
 

@@ -703,7 +703,7 @@ python3 -c "import json; print(json.dumps(json.load(open('logs/safe_mode_perform
 **OANDA:**
 1. Check credentials:
    ```bash
-   cat .env
+   cat .env.oanda_only
    ```
 
 2. Test connectivity:

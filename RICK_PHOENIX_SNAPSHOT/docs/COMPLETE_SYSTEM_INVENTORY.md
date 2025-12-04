@@ -218,8 +218,8 @@ foundation/progress.py           ← Progress tracking
 
 ### ✅ Environment & Configuration
 ```
- 
- 
+env_new.env                      ← Encrypted environment config
+env_new.env.gpg                  ← GPG-encrypted backup
 no_place_holders.env             ← Production environment
 configs/config_live.json         ← Live trading config
 configs/pairs_config.json        ← Currency pairs configuration

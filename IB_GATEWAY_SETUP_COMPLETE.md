@@ -9,7 +9,7 @@
 
 ## ✅ CONFIGURATION COMPLETE
 
-### **Environment File**: `.env`
+### **Environment File**: `env_new2.env`
 
 ```bash
 IB_GATEWAY_HOST=127.0.0.1
@@ -234,7 +234,7 @@ python3 brokers/ib_connector.py
 python3 load_env.py
 
 # Check IB configuration
-grep IB_ .env
+grep IB_ env_new2.env
 
 # Start paper trading with IB
 python3 -c "
@@ -286,7 +286,7 @@ print(ib.get_current_bid_ask('EUR.USD'))
 **Configuration**: ✅ COMPLETE  
 **Connector**: ✅ CREATED  
 **Library**: ✅ INSTALLED  
-**Environment**: ✅ .env  
+**Environment**: ✅ env_new2.env  
 **Account**: ✅ DU6880040 (Paper)  
 **Port**: ✅ 4002  
 **Waiting For**: 🚀 IB Gateway to be started

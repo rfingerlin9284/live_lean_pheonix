@@ -175,14 +175,14 @@ The initial backtest script ran but found no output. The script needs to be re-e
 ### What Happened:
 
 The system ran for 6+ hours with **NO environment variables loaded**:
-- Process started at 07:08 AM without loading `.env`
+- Process started at 07:08 AM without loading `paper_acct_env.env`
 - AuthManager fell back to missing `.env` file
 - No OANDA credentials → No market data → Brain returned `None`
 - Result: Silent failure (no crashes, no errors, no trades)
 
 ### Resolution:
 
-1. Used `.env` (AuthManager default)
+1. Copied `paper_acct_env.env` → `.env` (AuthManager default)
 2. Killed stale processes (PID 3894112, 3562229)
 3. Restarted via `./start_phoenix_v2.sh`
 4. **Result**: Signal generation resumed in < 10 seconds, 3 trades opened in < 60 seconds

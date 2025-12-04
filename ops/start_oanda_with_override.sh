@@ -35,7 +35,11 @@ eval "$ENV_ASSIGN"
 eval "export $ENV_ASSIGN"
 
 # Load environment variables from .env.oanda_only or .env (if present) so engine has credentials
-if [ -f .env ]; then
+if [ -f .env.oanda_only ]; then
+  set -o allexport
+  source .env.oanda_only
+  set +o allexport
+elif [ -f .env ]; then
   set -o allexport
   source .env
   set +o allexport

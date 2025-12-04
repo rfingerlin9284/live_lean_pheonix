@@ -33,7 +33,7 @@
 - [x] Data retrieval - Positions, account, pricing
 
 ### ✅ Environment Configuration Ready
-- [x] `.env` - Pre-configured
+- [x] `env_new2.env` - Pre-configured
 - [x] `IB_GATEWAY_HOST=127.0.0.1` - Localhost
 - [x] `IB_GATEWAY_PORT=4002` - Paper mode (safe)
 - [x] `IB_ACCOUNT_ID=DU6880040` - Paper account
