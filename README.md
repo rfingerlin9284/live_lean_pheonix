@@ -28,7 +28,42 @@
 
 ---
 
-## 🎯 System Overview
+## 🌳 Repository Branch Structure
+
+Due to GitHub's file size limitations, the complete RICK PHOENIX system (94GB) is organized across multiple branches:
+
+### Main Branch
+- **master** - Core system, documentation, and reassembly scripts
+
+### Feature Branches
+- **feature/core-engines** - Trading engines (OANDA, Coinbase, Ghost, Canary)
+- **feature/broker-connectors** - Broker API integrations
+- **feature/strategies** - Trading strategies (Bullish Wolf, Bearish Wolf, Sideways Wolf)
+- **feature/foundations** - Core logic, charter enforcement, smart logic
+- **feature/dashboards** - Web dashboards (Flask & Streamlit)
+- **feature/monitoring** - Monitoring, narration, and logging systems
+- **feature/hive-mind** - Consensus decision-making system
+- **feature/utilities** - Utility modules and helper functions
+- **feature/analysis-tools** - Performance analysis scripts
+- **feature/testing** - Test suites and validation scripts
+
+### Data Branches
+- **data/backtest-results** - Historical backtest data and results
+- **data/archived-simulations** - Simulation archives
+- **data/logs-historical** - Historical trading logs
+
+### Documentation Branches
+- **docs/comprehensive** - Complete system documentation
+- **docs/guides** - Setup and operation guides
+- **docs/api-reference** - API and integration documentation
+
+### Reassembly Tools
+- **REASSEMBLE_SYSTEM.sh** - Automated reassembly script
+- **AGENT_REASSEMBLY_PROMPT.md** - Complete instructions for agents/developers
+
+**To get the complete system**: Run `./REASSEMBLE_SYSTEM.sh` after cloning
+
+---
 
 RICK PHOENIX is a charter-compliant, autonomous trading platform that combines advanced algorithmic trading with institutional-grade risk management across multiple brokers and asset classes.
 
@@ -68,16 +103,37 @@ RICK PHOENIX is a charter-compliant, autonomous trading platform that combines a
 
 ## 🚀 Quick Start
 
+### System Reassembly (If Cloning from GitHub)
+
+**Important**: This repository is split across multiple branches due to its size (94GB total). To get the complete system:
+
+```bash
+# Clone the repository
+git clone git@github.com:rfingerlin9284/live_lean_pheonix.git
+cd live_lean_pheonix
+
+# Run the reassembly script
+chmod +x REASSEMBLE_SYSTEM.sh
+./REASSEMBLE_SYSTEM.sh
+```
+
+The script will automatically:
+- Fetch all feature branches
+- Merge core engines, strategies, and utilities
+- Restore dashboards and monitoring tools
+- Reconstruct the complete file tree
+
+**For detailed reassembly instructions**, see [AGENT_REASSEMBLY_PROMPT.md](AGENT_REASSEMBLY_PROMPT.md)
+
 ### Prerequisites
 - Python 3.11+ (3.11.9 recommended)
 - WSL Ubuntu or Linux
 - 4GB RAM minimum
-- 500MB disk space
+- 100GB disk space (for complete system)
 
-### Step 1: Clone Repository
+### Step 1: Navigate to Repository
 ```bash
-cd /home/ing/RICK
-cd RICK_PHOENIX
+cd /path/to/live_lean_pheonix
 ```
 
 ### Step 2: Create Virtual Environment
