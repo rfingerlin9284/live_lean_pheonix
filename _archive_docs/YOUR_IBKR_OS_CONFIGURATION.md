@@ -237,7 +237,7 @@ switch_mode('LIVE', pin=841921, brokers=['ibkr'])
 
 ```bash
 # View your IB configuration
-grep "IB_" /home/ing/RICK/RICK_LIVE_CLEAN/env_new2.env
+grep "IB_" /home/ing/RICK/RICK_LIVE_CLEAN/.env
 
 # Test IB connectivity
 python3 -c "from brokers.ib_connector import IBConnector; ib = IBConnector(pin=841921); print('✅ Connected')"

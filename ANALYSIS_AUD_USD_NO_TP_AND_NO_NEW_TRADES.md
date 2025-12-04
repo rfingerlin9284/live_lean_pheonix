@@ -23,7 +23,7 @@ TRADING_ENVIRONMENT = sandbox
 ### Likely Root Causes:
 
 #### A. **Old Configuration Still Running (Pending Restart)**
-- **Status**: System has NOT been restarted since you updated `paper_acct_env.env`
+- **Status**: System has NOT been restarted since you updated `.env`
 - **Evidence**: `.env.live` and `.env` were synced, but `start_phoenix_v2.sh` was never executed
 - **Impact**: The running Phoenix V2 instance is using OLD settings:
   - `MAX_CONCURRENT_POSITIONS = 5` (old limit)
@@ -105,7 +105,7 @@ Status: Active but UNSTABLE
 ### Configuration Pipeline Break:
 
 ```
-✅ DONE:  Updated paper_acct_env.env with:
+✅ DONE:  Updated .env with:
          - MAX_CONCURRENT_POSITIONS = 12
          - MAX_MARGIN_UTILIZATION = 0.70
          - Amplifier Protocol settings

@@ -38,8 +38,8 @@ This document is the central registry for all "Codeless" control mechanisms in t
 | **Snapshot Memory** | `Snapshot Memory` (Task) | Backup the current state of the AI memory. |
 | **Run Diagnostics** | `Run Diagnostics` (Task) | Check for broken connections or errors. |
 | **Start OANDA (Practice w/ Override)** | `Start OANDA (Practice w/ Override)` (Task) | Interactive task: prompts for UNLOCK_SECRET (HMAC), TTL; generates a token and starts OANDA practice engine with a time-limited, auditable override. |
-| **Update OANDA Credentials** | `Update OANDA Credentials` (Task) | Writes a secure `.env.oanda_only` with your practice credentials and locks permissions safely; it backs up any existing env file. |
-| **Update OANDA Credentials (Simplified)** | `Update OANDA Credentials (Simplify/No Lock)` (Task) | Writes `.env.oanda_only` and `.env` but does NOT modify file permissions or run lock scripts; used for local development and testing only. |
+| **Update OANDA Credentials** | `Update OANDA Credentials` (Task) | Writes a secure `.env` with your practice credentials and locks permissions safely; it backs up any existing env file. |
+| **Update OANDA Credentials (Simplified)** | `Update OANDA Credentials (Simplify/No Lock)` (Task) | Writes `.env` but does NOT modify file permissions or run lock scripts; used for local development and testing only. |
 
 ---
 

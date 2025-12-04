@@ -76,11 +76,11 @@ The Phoenix V2 system (`main.py` PID 3894112) has been running since **07:08 AM*
 
 1. **Yesterday (Nov 30):** User implemented Amplifier Protocol
    - Updated `charter.py`: MAX_CONCURRENT_POSITIONS=12, MAX_MARGIN=70%
-   - Updated `paper_acct_env.env` with new settings
+   - Updated `.env` with new settings
    
 2. **07:08 AM Today:** System restarted via `./start_phoenix_v2.sh`
    - Process started: `python3 /home/ing/RICK/RICK_PHOENIX/PhoenixV2/main.py`
-   - **BUG:** AuthManager tried to load `.env` (not `paper_acct_env.env`)
+   - **BUG:** AuthManager tried to load `.env`
    - `.env` file either missing or outdated → No credentials loaded
    
 3. **07:08 AM - Present:** System running in "zombie mode"
@@ -116,8 +116,8 @@ The Phoenix V2 system (`main.py` PID 3894112) has been running since **07:08 AM*
    - This morning's shorts were likely before the connection broke
 
 ### 4. **Environment File Confusion**
-   - Multiple env files: `.env`, `.env.live`, `paper_acct_env.env`, `env_new2.env`
-   - AuthManager doesn't explicitly load `paper_acct_env.env` (master file)
+   - Multiple env files: `.env`, `.env.live`
+   - AuthManager doesn't explicitly load `.env` (master file)
    - Falls back to `load_dotenv('.env')` which may not exist
 
 ---
@@ -132,7 +132,7 @@ The Phoenix V2 system (`main.py` PID 3894112) has been running since **07:08 AM*
    kill 3894112 3562229
    
    # Copy master env to .env (what AuthManager loads)
-   cp paper_acct_env.env .env
+   cp .env .env
    
    # Restart system
    ./start_phoenix_v2.sh
@@ -162,8 +162,8 @@ The Phoenix V2 system (`main.py` PID 3894112) has been running since **07:08 AM*
 
 ### Medium Priority:
 
-4. **🔄 Fix AuthManager to use paper_acct_env.env explicitly**
-   - Update `PhoenixV2/core/auth.py` to load `/home/ing/RICK/RICK_PHOENIX/paper_acct_env.env`
+4. **🔄 Fix AuthManager to use .env explicitly**
+   - Update `PhoenixV2/core/auth.py` to load `/home/ing/RICK/RICK_PHOENIX/.env`
    - Or set `DOTENV_PATH` environment variable before starting
    
 5. **🔍 Investigate Duplicate Position Logic**

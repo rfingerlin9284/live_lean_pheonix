@@ -1,1 +1,0 @@
-"""Coinbase package marker"""

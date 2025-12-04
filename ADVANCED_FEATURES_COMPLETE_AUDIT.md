@@ -396,7 +396,7 @@ POST /api/engine/orders/cancel
 #### **14.2 Credential Management**
 - **OANDA Tokens**: Environment variable storage
 - **API Keys**: Broker credential handling
-- **Secure Loading**: .env.oanda_only isolation
+- **Secure Loading**: .env isolation
 - **Encryption Ready**: Support for encrypted credentials
 
 #### **14.3 File-Level Security**

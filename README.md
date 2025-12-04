@@ -5,7 +5,7 @@
 # RICK PHOENIX: OANDA-ONLY ESSENTIALS
 
 ## System Overview
-This repository is a lean, production-ready version of the RICK PHOENIX trading system, focused exclusively on the OANDA platform. It is designed for robust, autonomous, and auditable live/practice trading, with all legacy, redundant, and non-essential code removed. Stubs for IBKR and Coinbase remain for future integration.
+This repository is a lean, production-ready version of the RICK PHOENIX trading system, focused exclusively on the OANDA platform. It is designed for robust, autonomous, and auditable live/practice trading, with all legacy, redundant, and non-essential code removed. Stubs for IBKR remain for future integration.
 
 ---
 

@@ -38,7 +38,7 @@ Usage
    - Or use the VS Code task `Lock Secrets`.
  - Developer / Simplify Mode: If you are in a development environment and want to skip permission hardening and locking, set `SIMPLIFY_MODE=1` and/or use the simplified tasks:
    - `SIMPLIFY_MODE=1 ./start_with_integrity.sh` or use the `Run OANDA Engine (Practice - Simplify)` task in VS Code.
-   - Use the simplified credential writer: `SIMPLIFY_MODE=1 bash ./scripts/write_env_file.sh .env.oanda_only .env --no-lock`
+  - Use the simplified credential writer: `SIMPLIFY_MODE=1 bash ./scripts/write_env_file.sh .env --no-lock`
 
 - Install the systemd service (Ubuntu/Debian):
   - `sudo cp ops/rick_phoenix.service /etc/systemd/system/rick_phoenix.service`

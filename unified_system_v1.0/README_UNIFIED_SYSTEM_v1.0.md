@@ -92,7 +92,7 @@ This snapshot captures a comprehensive trading system enhancement session focuse
 - Validated Charter with 34 assertions (all passing)
 - Validated momentum_trailing.py with 4 self-tests (all passing)
 - Created 8 markdown documentation files
-- Confirmed OANDA practice API credentials in `master.env`
+- Confirmed OANDA practice API credentials in `.env`
 
 ### Phase 7: Snapshot Creation Request (User - Current)
 **User Request:**  
@@ -592,7 +592,7 @@ Test 4: Partial Profit Logic
 
 ### OANDA API Credentials: ✅ VERIFIED
 ```bash
-$ grep OANDA_PRACTICE master.env
+$ grep OANDA_PRACTICE .env
 OANDA_PRACTICE_ACCOUNT_ID=your-practice-account-id
 OANDA_PRACTICE_TOKEN=your-practice-token
 OANDA_PRACTICE_BASE_URL=https://api-fxpractice.oanda.com
@@ -663,10 +663,10 @@ This implementation is **FULLY COMPLIANT** with the RICK Charter, including:
 
 **⚠️ IMPORTANT:** This snapshot contains references to OANDA practice API credentials. These are **DEMO ACCOUNT CREDENTIALS ONLY** and do not access real funds. 
 
-**Live trading credentials** (OANDA_LIVE_TOKEN, OANDA_LIVE_ACCOUNT_ID) are **NOT included** in this snapshot and must be configured separately in `master.env` before live trading.
+**Live trading credentials** (OANDA_LIVE_TOKEN, OANDA_LIVE_ACCOUNT_ID) are **NOT included** in this snapshot and must be configured separately in `.env` before live trading.
 
 **Best Practices:**
-- Keep `master.env` in `.gitignore`
+- Keep `.env` in `.gitignore`
 - Never commit API tokens to version control
 - Rotate tokens regularly
 - Use separate practice and live accounts
@@ -684,7 +684,7 @@ This implementation is **FULLY COMPLIANT** with the RICK Charter, including:
 **Support Channels:**
 - Charter violations: Review `foundation/rick_charter.py` validation
 - Trading issues: Check `narration.jsonl` for event logs
-- API errors: Verify credentials in `master.env`
+- API errors: Verify credentials in `.env`
 - Logic bugs: Run self-tests in `util/momentum_trailing.py`
 
 ---

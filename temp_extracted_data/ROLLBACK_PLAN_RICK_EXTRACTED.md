@@ -1,1 +1,0 @@
-# Placeholder for extracted content from ROLLBACK_PLAN_RICK_EXTRACTED.md

@@ -73,7 +73,7 @@ def restore_backup(bak_path: str, target: str):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--source", help="Source file to parse (env file)")
-    parser.add_argument("--target", default=".env.oanda_only", help="Target file to write (default .env.oanda_only)")
+    parser.add_argument("--target", default=".env", help="Target file to write (default .env)")
     parser.add_argument("--dry-run", action="store_true", help="Show what would be written (masked)")
     parser.add_argument("--apply", action="store_true", help="Apply the changes and write the target file")
     parser.add_argument("--revert", action="store_true", help="Revert using the most recent backup")
@@ -102,7 +102,7 @@ def main():
         # show summary and masked values
         print(f"Dry-run: Prepared to write {len(mapping)} entries to {args.target}")
         simple_keys = [
-            'RICK_PIN', 'OANDA_PRACTICE_ACCOUNT_ID', 'OANDA_PRACTICE_TOKEN', 'OANDA_LIVE_TOKEN',
+            'RICK_PIN', 'OANDA_PRACTICE_ACCOUNT_ID', 'OANDA_PAPER', 'OANDA_LIVE_TOKEN',
             'COINBASE_SANDBOX_API_KEY', 'COINBASE_SANDBOX_API_SECRET', 'TELEGRAM_BOT_TOKEN'
         ]
         for k in sorted(mapping.keys()):

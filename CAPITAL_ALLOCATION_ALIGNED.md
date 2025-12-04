@@ -31,7 +31,7 @@
 
 ## 🎯 CAPITAL LIMIT ENFORCEMENT
 
-### **Configuration** (`env_new2.env`):
+### **Configuration** (`.env`):
 ```bash
 # IB Gateway Settings
 IB_ACCOUNT_ID=DU6880040
@@ -164,7 +164,7 @@ IB:       $6,000 (60%)    → Multi-Asset (use more of $10k)
 TOTAL:    $10,000 (100%)
 ```
 
-**To increase IB allocation**, edit `env_new2.env`:
+**To increase IB allocation**, edit `.env`:
 ```bash
 IB_MAX_CAPITAL_USD=6000.00  # Use more of available $10k
 ```

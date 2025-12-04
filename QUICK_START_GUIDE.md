@@ -10,8 +10,8 @@
 # Python 3.8+
 python3 --version
 
-# Required environment variables in master.env
-OANDA_PRACTICE_TOKEN=your_practice_token_here
+# Required environment variables in .env
+OANDA_PAPER=your_paper_token_here
 OANDA_PRACTICE_ACCOUNT_ID=your_practice_account_id
 
 # For live trading (optional)
@@ -194,7 +194,7 @@ self.hive_trigger_confidence = 0.80  # 80% Hive consensus threshold
 
 ### "API pricing failed"
 - Engine falls back to simulated prices (approximate market prices with random variation)
-- Check OANDA API token and account ID in `master.env`
+- Check OANDA API token and account ID in `.env`
 - Verify network connectivity
 
 ### "CHARTER VIOLATION" errors

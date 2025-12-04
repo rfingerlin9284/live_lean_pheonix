@@ -66,7 +66,7 @@ price = ib.get_price('EUR_USD')
 ---
 
 ### ✅ 3. Environment Configuration
-**File**: `env_new2.env`  
+**File**: `.env`  
 **Status**: Pre-configured  
 
 **Critical Settings**:
@@ -352,7 +352,7 @@ python3 -c "import ib_insync; print('✅ ib_insync installed')"
 # 2. Account → Account Information
 # 3. Account number format: DU6880040 (paper) or U1234567 (live)
 
-# Update env_new2.env
+# Update .env
 export IB_ACCOUNT_ID=DU6880040
 export IB_LIVE_ACCOUNT_ID=U1234567
 ```
@@ -520,7 +520,7 @@ watch -n 1 'lsof -i :4002'
 | Live trading port | ✅ 4001 | Locked | YES |
 | PIN verification | ✅ 841921 | Validated | YES |
 | Charter integration | ✅ Verified | Compliant | YES |
-| Environment config | ✅ Set | env_new2.env | YES |
+| Environment config | ✅ Set | .env | YES |
 | Narration logging | ✅ Active | Audit trail | YES |
 | Position guardian | ✅ Gates | 7 rules | YES |
 | Orchestration wire | ✅ Pointers | JSON feed | YES |
@@ -569,7 +569,7 @@ watch -n 1 'lsof -i :4002'
 
 - **Installer**: `/home/ing/RICK/RICK_LIVE_CLEAN/install_ib_gateway.sh`
 - **Connector**: `/home/ing/RICK/RICK_LIVE_CLEAN/brokers/ib_connector.py`
-- **Configuration**: `/home/ing/RICK/RICK_LIVE_CLEAN/env_new2.env`
+- **Configuration**: `/home/ing/RICK/RICK_LIVE_CLEAN/.env`
 - **Monitoring**: `http://127.0.0.1:8080` (real-time dashboard)
 - **Orchestration**: `/home/ing/RICK/RICK_LIVE_CLEAN/Makefile.wolfpack`
 

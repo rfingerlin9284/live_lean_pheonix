@@ -73,7 +73,7 @@ if env_file.exists():
             os.environ[key.strip()] = value.strip()
 
 account_id = os.environ.get('OANDA_PRACTICE_ACCOUNT_ID', '')
-token = os.environ.get('OANDA_PRACTICE_TOKEN', '')
+token = os.environ.get('OANDA_PAPER', '')
 
 if not account_id or not token:
     print('NO_CREDS')
