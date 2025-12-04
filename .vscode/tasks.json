@@ -46,7 +46,7 @@
     {
       "label": "📊 Live Narration Feed (Auto-refresh)",
       "type": "shell",
-      "command": "bash -c 'echo \"Waiting for narration.jsonl...\"; while true; do if [ -f ${workspaceFolder}/narration.jsonl ]; then clear; echo \"=== LIVE NARRATION FEED (Last 30 events) ===\"; echo \"Refreshes every 10 seconds...\"; echo \"\"; tail -30 ${workspaceFolder}/narration.jsonl | while IFS= read -r line; do echo \"$line\" | python3 -c \"import sys, json; d=json.loads(sys.stdin.read()); print(f\\\"[{d.get(\\\"timestamp\\\",\\\"N/A\\\")}] {d.get(\\\"event_type\\\",\\\"UNKNOWN\\\")}: {d.get(\\\"symbol\\\",\\\"N/A\\\")} - {d.get(\\\"details\\\",{})}\\\")\" 2>/dev/null || echo \"$line\"; done; else echo \"No narration.jsonl found yet. Waiting...\"; fi; sleep 10; done'",
+      "command": "bash ${workspaceFolder}/.vscode/narration_feed.sh narration.jsonl",
       "isBackground": true,
       "presentation": {
         "echo": true,

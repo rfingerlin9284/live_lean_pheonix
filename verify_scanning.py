@@ -12,6 +12,7 @@ import time
 import subprocess
 from pathlib import Path
 from datetime import datetime, timedelta
+from typing import Optional
 
 class Colors:
     GREEN = '\033[92m'
@@ -26,6 +27,24 @@ def print_header(text):
     print(f"\n{Colors.BOLD}{Colors.CYAN}{'='*80}{Colors.ENDC}")
     print(f"{Colors.BOLD}{Colors.CYAN}{text.center(80)}{Colors.ENDC}")
     print(f"{Colors.BOLD}{Colors.CYAN}{'='*80}{Colors.ENDC}\n")
+
+def _parse_event_timestamp(timestamp_str: str) -> Optional[datetime]:
+    """Parse event timestamp, handling both timezone-aware and naive formats"""
+    try:
+        if not timestamp_str:
+            return None
+        
+        # Normalize timezone format
+        timestamp_str = timestamp_str.replace('Z', '+00:00')
+        event_time = datetime.fromisoformat(timestamp_str)
+        
+        # Make naive if it has timezone info (for comparison with naive datetime.now())
+        if event_time.tzinfo is not None:
+            event_time = event_time.replace(tzinfo=None)
+        
+        return event_time
+    except (ValueError, AttributeError):
+        return None
 
 def check_narration_activity():
     """Check if narration.jsonl is being actively updated"""
@@ -69,14 +88,9 @@ def check_narration_activity():
                 try:
                     event = json.loads(line)
                     timestamp_str = event.get('timestamp', '')
-                    # Handle both timezone-aware and naive timestamps
-                    if timestamp_str:
-                        timestamp_str = timestamp_str.replace('Z', '+00:00')
-                        event_time = datetime.fromisoformat(timestamp_str)
-                        # Make naive if it has timezone info
-                        if event_time.tzinfo is not None:
-                            event_time = event_time.replace(tzinfo=None)
-                    else:
+                    event_time = _parse_event_timestamp(timestamp_str)
+                    
+                    if event_time is None:
                         continue
                     
                     if event_time > cutoff:

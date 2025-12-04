@@ -89,7 +89,7 @@ def _read_rick_env() -> str:
                     if line.startswith('RICK_ENV='):
                         value = line.split('=', 1)[1].strip().strip('"\'')
                         return value
-        except (OSError, IOError) as e:
+        except (OSError, IOError):
             # File read errors - just fall through to default
             pass
     
@@ -99,9 +99,11 @@ def _read_rick_env() -> str:
 
 def _get_env_file_path() -> Optional[Path]:
     """Get path to .env file"""
+    MAX_SEARCH_DEPTH = 5  # How many parent directories to check
+    
     # Try to find .env in current directory or parent directories
     current = Path.cwd()
-    for _ in range(5):  # Search up to 5 levels
+    for _ in range(MAX_SEARCH_DEPTH):
         env_file = current / '.env'
         if env_file.exists():
             return env_file
