@@ -46,7 +46,7 @@
     {
       "label": "📊 Live Narration Feed (Auto-refresh)",
       "type": "shell",
-      "command": "bash ${workspaceFolder}/.vscode/narration_feed.sh narration.jsonl",
+      "command": "bash ${workspaceFolder}/scripts/narration_feed.sh narration.jsonl",
       "isBackground": true,
       "presentation": {
         "echo": true,
