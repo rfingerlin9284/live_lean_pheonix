@@ -181,6 +181,34 @@ streamlit run dashboard.py
 # Opens at: http://localhost:8501
 ```
 
+### Step 7: Setup Persistent Monitoring Terminals (VSCode)
+
+For the best monitoring experience with auto-refreshing terminals:
+
+```bash
+# Quick start guide
+./quick_start_terminals.sh
+
+# Or manually verify scanning
+python3 verify_scanning.py
+```
+
+**In VSCode**:
+1. Open Command Palette (`Ctrl+Shift+P` or `Cmd+Shift+P`)
+2. Select "Tasks: Run Task"
+3. Choose "🎯 Start Two Persistent Terminals"
+
+This sets up:
+- **Terminal 1**: System Watchdog (auto-refresh every 30s)
+- **Terminal 2**: Live Narration Feed (auto-refresh every 10s)
+
+See [TERMINAL_SETUP_GUIDE.md](TERMINAL_SETUP_GUIDE.md) for complete documentation.
+
+**Environment Toggle** (Practice ↔ Live):
+- Use VSCode task: "⚙️ Toggle Practice/Live Environment"
+- Or edit `.env`: `RICK_ENV=practice` or `RICK_ENV=live`
+- Then restart the trading engine
+
 ---
 
 ## 🏗️ Architecture & Components
