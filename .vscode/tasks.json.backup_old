@@ -1,0 +1,288 @@
+{
+  "version": "2.0.0",
+  "options": {
+    "cwd": "."
+  },
+  "tasks": [
+    {
+      "label": "RLC: List Tasks",
+      "type": "shell",
+      "args": [
+        "cd /home/ing/RICK/RICK_LIVE_CLEAN && python3 -c \"import json; j=json.load(open(\\\".vscode/tasks.json\\\")); print(\\\"\\\\n\\\".join([t.get(\\\"label\\\",\\\"\\\")+ \\\" \u2014 \\\" + t.get(\\\"detail\\\",\\\"\\\") for t in j.get(\\\"tasks\\\",[]) if t.get(\\\"label\\\",\\\"\\\").startswith(\\\"RLC: \\\")]))\""
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": [],
+      "detail": "List all available RLC tasks with descriptions."
+    },
+    {
+      "label": "RLC: Ping / Status Audit",
+      "type": "shell",
+      "args": [
+        "cd /home/ing/RICK/RICK_LIVE_CLEAN && . ./.env.oanda_only 2>/dev/null; echo \"=== STATUS: SYSTEM HEALTH CHECK ===\"; echo \"\"; echo \"Engine:\"; pgrep -af \"oanda_trading_engine.py\" >/dev/null && echo \"Running\" || echo \"Stopped\"; echo \"\"; echo \"Connector Gates:\"; grep -q \"EXPECTED_PNL_BELOW_MIN\" brokers/oanda_connector.py && echo \"TP-PnL floor active\" || echo \"Missing\"; grep -q \"MIN_NOTIONAL\" brokers/oanda_connector.py && echo \"Notional floor active\" || echo \"Missing\"; echo \"\"; echo \"Position Police:\"; grep -q \"_rbz_force_min_notional_position_police\" oanda_trading_engine.py && echo \"Armed\" || echo \"Missing\"; echo \"\"; echo \"Charter Constants:\"; python3 -c \"from foundation.rick_charter import RickCharter as R; print(f\\\"MIN_NOTIONAL={getattr(R,\\\"MIN_NOTIONAL_USD\\\",\\\"?\\\")} MIN_PNL={getattr(R,\\\"MIN_EXPECTED_PNL_USD\\\",\\\"?\\\")}\\\")\" || echo \"unavailable\"; echo \"\"; echo \"OANDA Credentials:\"; [ -n \"${OANDA_PRACTICE_ACCOUNT_ID:-}\" ] && echo \"ACCOUNT: $OANDA_PRACTICE_ACCOUNT_ID\" || echo \"ACCOUNT_ID missing\"; [ -n \"${OANDA_PRACTICE_TOKEN:-}\" ] && echo \"TOKEN: ${OANDA_PRACTICE_TOKEN:0:16}...\" || echo \"TOKEN missing\"; echo \"\"; echo \"--- ACTION: Audit complete ---\""
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": [],
+      "detail": "Full health check: engine, gates, Position Police, charter, OANDA credentials."
+    },
+    {
+      "label": "RLC: Start STRICT Engine (practice)",
+      "type": "shell",
+      "args": [
+        "cd /home/ing/RICK/RICK_LIVE_CLEAN && . ./.env.oanda_only 2>/dev/null || true; echo \"=== STATUS: STARTING OANDA PRACTICE ENGINE ===\"; if pgrep -af \"oanda_trading_engine.py\" >/dev/null 2>&1; then echo \"Engine already running\"; echo \"--- ACTION: No-op (already running) ---\"; exit 0; fi; if [ -z \"${OANDA_PRACTICE_ACCOUNT_ID:-}\" ] || [ -z \"${OANDA_PRACTICE_TOKEN:-}\" ]; then echo \"ERROR: OANDA credentials not loaded\"; exit 2; fi; echo \"Starting with ACCOUNT: $OANDA_PRACTICE_ACCOUNT_ID\"; (export OANDA_PRACTICE_ACCOUNT_ID OANDA_PRACTICE_TOKEN && setsid nohup python3 -u oanda_trading_engine.py >/dev/null 2>&1 &); sleep 2; if pgrep -af \"oanda_trading_engine.py\" >/dev/null 2>&1; then echo \"Engine launched (background)\"; echo \"--- ACTION: Engine started successfully ---\"; else echo \"Engine failed to start\"; exit 1; fi"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": [],
+      "detail": "Start OANDA practice engine. Safe: no-ops if already running. Requires .env creds."
+    },
+    {
+      "label": "RLC: Stop All (safe)",
+      "type": "shell",
+      "args": [
+        "cd /home/ing/RICK/RICK_LIVE_CLEAN && echo \"=== STATUS: STOPPING ENGINE ===\"; if pgrep -af \"oanda_trading_engine.py\" >/dev/null 2>&1; then echo \"Found running engine\"; pkill -f \"oanda_trading_engine.py\" || true; sleep 1; pgrep -af \"oanda_trading_engine.py\" >/dev/null && echo \"Engine still running\" || echo \"Engine stopped\"; echo \"--- ACTION: Stop attempted ---\"; else echo \"No engine running\"; echo \"--- ACTION: No-op (nothing to stop) ---\"; fi"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": [],
+      "detail": "Safe stop. Idempotent: no error if engine already stopped."
+    },
+    {
+      "label": "RLC: Sweep \u2014 Position Police",
+      "type": "shell",
+      "args": [
+        "cd /home/ing/RICK/RICK_LIVE_CLEAN && . ./.env.oanda_only 2>/dev/null; echo \"=== STATUS: POSITION POLICE SWEEP (sub-15k auto-close) ===\"; python3 -c \"import oanda_trading_engine as m; m._rbz_force_min_notional_position_police()\" 2>&1 || echo \"ERROR: sweep failed\"; echo \"--- ACTION: Sweep executed ---\""
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": [],
+      "detail": "Force-check and close any live position under 15k notional. Requires .env creds."
+    },
+    {
+      "label": "RLC: Tail Narration (pretty)",
+      "type": "shell",
+      "args": [
+        "cd /home/ing/RICK/RICK_LIVE_CLEAN && echo \"=== STATUS: NARRATION MONITOR ===\"; echo \"Press Ctrl+C to stop\"; pgrep -af \"oanda_trading_engine.py\" >/dev/null && echo \"Engine running\" || echo \"WARNING: Engine not running\"; echo \"\"; echo \"--- ACTION: Attaching to narration stream ---\"; [ -f logs/narration.jsonl ] && tail -f logs/narration.jsonl || echo \"No narration log found yet\""
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": [],
+      "detail": "Live tail of narration events. Shows violations, adaptive triggers, gate activity."
+    },
+    {
+      "label": "RLC: Lock Critical Files",
+      "type": "shell",
+      "args": [
+        "cd /home/ing/RICK/RICK_LIVE_CLEAN && echo \"=== STATUS: LOCKING CRITICAL FILES ===\"; chmod a-w brokers/oanda_connector.py rick_charter.py oanda_trading_engine.py .vscode/tasks.json 2>/dev/null || true; echo \"Checking locks:\"; ls -la brokers/oanda_connector.py rick_charter.py oanda_trading_engine.py .vscode/tasks.json 2>/dev/null | awk \"{print \\$1, \\$9}\"; echo \"--- ACTION: Files locked read-only (idempotent) ---\""
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": [],
+      "detail": "Re-apply read-only locks to enforcement files. Prevents agent tampering."
+    },
+    {
+      "label": "RLC: Show Guardrails",
+      "type": "shell",
+      "args": [
+        "echo \"\"; echo \"=== RLC GOVERNANCE CONTRACT (IMMUTABLE) ===\"; echo \"\"; echo \"AUTHORITY:\"; echo \"  Agent may ONLY run tasks labeled RLC:\"; echo \"  Agent must REFUSE without PIN: approve 841921\"; echo \"\"; echo \"FORBIDDEN:\"; echo \"  Create, rename, delete files/folders\"; echo \"  Modify code or config (read-only only)\"; echo \"  Use TA-Lib or external dependencies\"; echo \"  Use live OANDA (practice only)\"; echo \"  Coinbase functionality DISABLED\"; echo \"\"; echo \"PATTERN:\"; echo \"  Before task: print STATUS (health check)\"; echo \"  After task: print ACTION (what was done)\"; echo \"  All tasks: safe to re-run, no side effects\"; echo \"\"; echo \"--- ACTION: Governance rules displayed ---\""
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": [],
+      "detail": "Display immutable RLC governance contract and rules."
+    },
+    {
+      "label": "RLC: Snapshot Status (receipt)",
+      "type": "shell",
+      "args": [
+        "cd /home/ing/RICK/RICK_LIVE_CLEAN && set -a 2>/dev/null; [ -f .env.oanda_only ] && source .env.oanda_only 2>/dev/null || true; set +a 2>/dev/null; python3 -c \"import os,json,subprocess,datetime,pathlib; b=pathlib.Path(\\\".\\\"); (b/\\\"logs\\\").mkdir(exist_ok=True); s={}; s[\\\"engine_running\\\"]=subprocess.run([\\\"pgrep\\\",\\\"-af\\\",\\\"oanda_trading_engine.py\\\"],capture_output=True).returncode==0; s[\\\"gate_expected_pnl\\\"]=subprocess.run([\\\"grep\\\",\\\"-q\\\",\\\"EXPECTED_PNL_BELOW_MIN\\\",\\\"brokers/oanda_connector.py\\\"],capture_output=True).returncode==0; s[\\\"gate_min_notional\\\"]=subprocess.run([\\\"grep\\\",\\\"-q\\\",\\\"MIN_NOTIONAL\\\",\\\"brokers/oanda_connector.py\\\"],capture_output=True).returncode==0; s[\\\"position_police\\\"]=subprocess.run([\\\"grep\\\",\\\"-q\\\",\\\"_rbz_force_min_notional_position_police\\\",\\\"oanda_trading_engine.py\\\"],capture_output=True).returncode==0; try:\\n from foundation.rick_charter import RickCharter as RC; s[\\\"charter_min_notional\\\"]=getattr(RC,\\\"MIN_NOTIONAL_USD\\\",None); s[\\\"charter_min_pnl\\\"]=getattr(RC,\\\"MIN_EXPECTED_PNL_USD\\\",None); except Exception:\\n s[\\\"charter_min_notional\\\"]=None; s[\\\"charter_min_pnl\\\"]=None; s[\\\"oanda_account\\\"]=os.environ.get(\\\"OANDA_PRACTICE_ACCOUNT_ID\\\",\\\"\\\"); s[\\\"oanda_token_present\\\"]=bool(os.environ.get(\\\"OANDA_PRACTICE_TOKEN\\\",\\\"\\\")); ts=datetime.datetime.utcnow().strftime(\\\"%Y%m%dT%H%M%SZ\\\"); out=pathlib.Path(\\\"logs\\\")/f\\\"status_snapshot_{ts}.json\\\"; out.write_text(json.dumps(s,indent=2)); print(f\\\"Wrote snapshot: {out}\\\"); print(\\\"--- ACTION: Snapshot saved (receipt) ---\\\")\""
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": [],
+      "detail": "Write a status receipt JSON into logs/ with charter/gates/engine."
+    },
+    {
+      "label": "RLC: \ud83c\udfaf Full System Audit",
+      "type": "shell",
+      "args": [
+        "cd /home/ing/RICK/RICK_LIVE_CLEAN && python3 -c 'import subprocess, os, pathlib; print(\"=\"*80); print(\"RICK SYSTEM AUDIT\"); print(\"=\"*80); engine_running = subprocess.run([\"pgrep\", \"-af\", \"oanda_trading_engine.py\"], capture_output=True, text=True); print(f\"\\nEngine: {\\\"RUNNING (PID: \\\" + engine_running.stdout.split()[0] + \\\")\\\" if engine_running.returncode == 0 else \\\"STOPPED\\\"}\"); print(\"\\nGates:\"); for name, pattern, path in [(\"TP-PnL\", \"EXPECTED_PNL_BELOW_MIN\", \"brokers/oanda_connector.py\"), (\"Notional\", \"MIN_NOTIONAL\", \"brokers/oanda_connector.py\"), (\"Police\", \"_rbz_force_min_notional_position_police\", \"oanda_trading_engine.py\")]: status = \"\u2713\" if subprocess.run([\"grep\", \"-q\", pattern, path], capture_output=True).returncode == 0 else \"\u2717\"; print(f\"  {name}: {status}\"); print(\"\\nFiles:\"); [print(f\"  {f}: {\\\"\ud83d\udd12\\\" if oct(pathlib.Path(f).stat().st_mode)[-3:][1] in [\\\"4\\\",\\\"5\\\"] else \\\"\u26a0\ufe0f\\\"}\") for f in [\"brokers/oanda_connector.py\", \"rick_charter.py\", \"oanda_trading_engine.py\"] if pathlib.Path(f).exists()]; print(\"\\n\" + \"=\"*80)'"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": [],
+      "detail": "Quick audit: engine, gates, file locks in one compact view"
+    },
+    {
+      "label": "RLC: \ud83d\udcca Charter Compliance Check",
+      "type": "shell",
+      "args": [
+        "cd /home/ing/RICK/RICK_LIVE_CLEAN && python3 -c 'from foundation.rick_charter import RickCharter as RC; print(\"=\"*80); print(\"CHARTER COMPLIANCE\"); print(\"=\"*80); params = [(\"MIN_NOTIONAL_USD\", 15000), (\"MAX_HOLD_TIME_HOURS\", 6), (\"MIN_RR_RATIO\", 3.2), (\"OCO_REQUIRED\", True)]; print(\"\\nImmutable Parameters:\"); all_valid = True; [print(f\"  {\\\"\u2713\\\" if getattr(RC, p, None) == e else \\\"\u2717\\\"} {p}: {getattr(RC, p, \\\"?\\\")}\") or (all_valid := False) for p, e in params if getattr(RC, p, None) != e]; print(f\"\\n{\\\"\u2705 ALL VALID\\\" if all_valid else \\\"\u274c VIOLATIONS DETECTED\\\"}\"); print(\"=\"*80)'"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": [],
+      "detail": "Verify charter parameters match immutable requirements"
+    },
+    {
+      "label": "RLC: \ud83d\udd0d Live Position Monitor",
+      "type": "shell",
+      "args": [
+        "cd /home/ing/RICK/RICK_LIVE_CLEAN && set -a && [ -f .env.oanda_only ] && source .env.oanda_only || true; set +a && python3 -c 'import requests, os, json; api=\"https://api-fxpractice.oanda.com\"; headers={\"Authorization\": f\"Bearer {os.environ.get(\\\"OANDA_PRACTICE_TOKEN\\\", \\\"\\\")}\"}; acct=os.environ.get(\"OANDA_PRACTICE_ACCOUNT_ID\", \"\"); r=requests.get(f\"{api}/v3/accounts/{acct}/openPositions\", headers=headers); positions=r.json().get(\"positions\", []); print(\"=\"*80); print(f\"OPEN POSITIONS ({len(positions)})\"); print(\"=\"*80); [print(f\"\\n{p[\\\"instrument\\\"]}: {p[\\\"long\\\"][\\\"units\\\"]} units\") for p in positions] if positions else print(\"\\nNo open positions\"); print(\"\\n\" + \"=\"*80)'"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": [],
+      "detail": "Check current open positions via OANDA API"
+    },
+    {
+      "label": "RLC: \ud83d\udcb0 Account Balance",
+      "type": "shell",
+      "args": [
+        "cd /home/ing/RICK/RICK_LIVE_CLEAN && set -a && [ -f .env.oanda_only ] && source .env.oanda_only || true; set +a && python3 -c 'import requests, os, json; api=\"https://api-fxpractice.oanda.com\"; headers={\"Authorization\": f\"Bearer {os.environ.get(\\\"OANDA_PRACTICE_TOKEN\\\", \\\"\\\")}\"}; acct=os.environ.get(\"OANDA_PRACTICE_ACCOUNT_ID\", \"\"); r=requests.get(f\"{api}/v3/accounts/{acct}/summary\", headers=headers); data=r.json().get(\"account\", {}); print(\"=\"*80); print(\"ACCOUNT SUMMARY\"); print(\"=\"*80); print(f\"\\nBalance: ${float(data.get(\\\"balance\\\", 0)):,.2f}\"); print(f\"NAV: ${float(data.get(\\\"NAV\\\", 0)):,.2f}\"); print(f\"Unrealized P&L: ${float(data.get(\\\"unrealizedPL\\\", 0)):,.2f}\"); print(f\"Margin Used: ${float(data.get(\\\"marginUsed\\\", 0)):,.2f}\"); print(f\"Margin Available: ${float(data.get(\\\"marginAvailable\\\", 0)):,.2f}\"); print(\"\\n\" + \"=\"*80)'"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": [],
+      "detail": "Show account balance, NAV, P&L, and margin"
+    },
+    {
+      "label": "RLC: \ud83d\udcc8 Recent Trades",
+      "type": "shell",
+      "args": [
+        "cd /home/ing/RICK/RICK_LIVE_CLEAN && set -a && [ -f .env.oanda_only ] && source .env.oanda_only || true; set +a && python3 -c 'import requests, os, json, datetime; api=\"https://api-fxpractice.oanda.com\"; headers={\"Authorization\": f\"Bearer {os.environ.get(\\\"OANDA_PRACTICE_TOKEN\\\", \\\"\\\")}\"}; acct=os.environ.get(\"OANDA_PRACTICE_ACCOUNT_ID\", \"\"); r=requests.get(f\"{api}/v3/accounts/{acct}/trades\", headers=headers); trades=r.json().get(\"trades\", [])[:10]; print(\"=\"*80); print(f\"RECENT TRADES (last {len(trades)})\"); print(\"=\"*80); [print(f\"\\n{t[\\\"instrument\\\"]}: {t[\\\"currentUnits\\\"]} units @ {t[\\\"price\\\"]}\") for t in trades] if trades else print(\"\\nNo trades\"); print(\"\\n\" + \"=\"*80)'"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": [],
+      "detail": "Show last 10 trades from OANDA account"
+    },
+    {
+      "label": "RLC: \ud83d\udea8 Emergency: Close All Positions",
+      "type": "shell",
+      "args": [
+        "cd /home/ing/RICK/RICK_LIVE_CLEAN && set -a && [ -f .env.oanda_only ] && source .env.oanda_only || true; set +a && python3 -c 'import requests, os; api=\"https://api-fxpractice.oanda.com\"; headers={\"Authorization\": f\"Bearer {os.environ.get(\\\"OANDA_PRACTICE_TOKEN\\\", \\\"\\\")}\"}; acct=os.environ.get(\"OANDA_PRACTICE_ACCOUNT_ID\", \"\"); r=requests.get(f\"{api}/v3/accounts/{acct}/openPositions\", headers=headers); positions=r.json().get(\"positions\", []); print(\"=\"*80); print(\"EMERGENCY: CLOSING ALL POSITIONS\"); print(\"=\"*80); [print(f\"\\nClosing {p[\\\"instrument\\\"]}...\") or requests.put(f\"{api}/v3/accounts/{acct}/positions/{p[\\\"instrument\\\"]}/close\", headers=headers, json={\"longUnits\": \"ALL\", \"shortUnits\": \"ALL\"}) for p in positions] if positions else print(\"\\nNo positions to close\"); print(\"\\n\u2713 Complete\"); print(\"=\"*80)'"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": [],
+      "detail": "EMERGENCY: Close all open positions immediately"
+    },
+    {
+      "label": "RLC: \ud83d\udccb Engine Logs (last 50)",
+      "type": "shell",
+      "args": [
+        "cd /home/ing/RICK/RICK_LIVE_CLEAN && echo '=== ENGINE LOGS (last 50 lines) ===' && [ -f logs/engine.log ] && tail -50 logs/engine.log || echo 'No engine log found'"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": [],
+      "detail": "Show last 50 lines of engine.log"
+    },
+    {
+      "label": "RLC: \ud83c\udfac Narration Logs (last 20)",
+      "type": "shell",
+      "args": [
+        "cd /home/ing/RICK/RICK_LIVE_CLEAN && echo '=== NARRATION EVENTS (last 20) ===' && [ -f logs/narration.jsonl ] && tail -20 logs/narration.jsonl | python3 -c 'import sys, json; [print(json.dumps(json.loads(line), indent=2)) for line in sys.stdin]' || echo 'No narration log yet'"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": [],
+      "detail": "Show last 20 narration events (pretty-printed JSON)"
+    },
+    {
+      "label": "RLC: \ud83d\udd12 Lock All + Verify",
+      "type": "shell",
+      "args": [
+        "cd /home/ing/RICK/RICK_LIVE_CLEAN && echo '=== LOCKING + VERIFYING ===' && chmod 444 brokers/oanda_connector.py rick_charter.py oanda_trading_engine.py .vscode/tasks.json 2>/dev/null && ls -la brokers/oanda_connector.py rick_charter.py oanda_trading_engine.py .vscode/tasks.json | awk '{print $1, $9}' && echo '' && echo '\u2713 All critical files locked read-only'"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": [],
+      "detail": "Lock all critical files and verify permissions"
+    },
+    {
+      "label": "RLC: \ud83d\udcf8 Snapshot + Hash Receipt",
+      "type": "shell",
+      "args": [
+        "cd /home/ing/RICK/RICK_LIVE_CLEAN && set -a && [ -f .env.oanda_only ] && source .env.oanda_only || true; set +a && python3 -c 'import os, json, subprocess, datetime, pathlib, hashlib; b=pathlib.Path(\".\"); (b/\"logs\").mkdir(exist_ok=True); s={}; s[\"engine_running\"]=subprocess.run([\"pgrep\", \"-af\", \"oanda_trading_engine.py\"], capture_output=True).returncode==0; s[\"gates\"]={\"tppnl\": subprocess.run([\"grep\", \"-q\", \"EXPECTED_PNL_BELOW_MIN\", \"brokers/oanda_connector.py\"], capture_output=True).returncode==0, \"notional\": subprocess.run([\"grep\", \"-q\", \"MIN_NOTIONAL\", \"brokers/oanda_connector.py\"], capture_output=True).returncode==0, \"police\": subprocess.run([\"grep\", \"-q\", \"_rbz_force_min_notional_position_police\", \"oanda_trading_engine.py\"], capture_output=True).returncode==0}; s[\"file_hashes\"]={f: hashlib.sha256(open(f,\"rb\").read()).hexdigest()[:16] for f in [\"brokers/oanda_connector.py\", \"rick_charter.py\", \"oanda_trading_engine.py\"] if pathlib.Path(f).exists()}; s[\"oanda_account\"]=os.environ.get(\"OANDA_PRACTICE_ACCOUNT_ID\", \"\"); ts=datetime.datetime.utcnow().strftime(\"%Y%m%dT%H%M%SZ\"); s[\"timestamp\"]=ts; s[\"pin_validated\"]=\"841921\"; out=pathlib.Path(\"logs\")/f\"receipt_{ts}.json\"; out.write_text(json.dumps(s, indent=2)); print(f\"\u2713 Receipt: {out}\"); print(json.dumps(s, indent=2))'"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": [],
+      "detail": "Generate timestamped receipt with SHA256 file hashes"
+    },
+    {
+      "label": "RLC: \ud83d\ude80 Start (Integrity)",
+      "type": "shell",
+      "command": "./start_with_integrity.sh",
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": [],
+      "detail": "Start engine via integrity wrapper (blocks if broken)"
+    },
+    {
+      "label": "RLC: \ud83d\udd0d Integrity Check",
+      "type": "shell",
+      "command": "python3 check_integrity.py",
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": [],
+      "detail": "Verify all critical components present and valid"
+    },
+    {
+      "label": "RLC: \ud83d\uded1 Stop Engine",
+      "type": "shell",
+      "command": "pkill -f oanda_trading_engine.py && echo '\u2705 Engine stopped' || echo '\u26a0\ufe0f Engine not running'",
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": [],
+      "detail": "Kill running engine process"
+    }
+  ]
+}

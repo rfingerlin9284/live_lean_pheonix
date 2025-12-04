@@ -1,0 +1,19 @@
+{
+  "makefile.extensionOutputFolder": "./.vscode",
+  "makefile.launchConfigurations": [
+    {
+      "cwd": "/home/ing/RICK/RICK_LIVE_CLEAN",
+      "binaryPath": "/usr/bin/make",
+      "binaryArgs": []
+    }
+  ],
+  "makefile.configurations": [
+    {
+      "name": "Default",
+      "makeArgs": []
+    }
+  ],
+  "makefile.makePath": "/usr/bin/make",
+  "makefile.makeDirectory": "/home/ing/RICK/RICK_LIVE_CLEAN",
+  "makefile.buildLog": "${workspaceFolder}/.vscode/make_build.log"
+}

@@ -1,0 +1,32 @@
+{
+  "generated_at": "2025-12-03T18:29:15Z",
+  "files_present": [
+    {
+      "oanda/oanda_trading_engine.py": true
+    },
+    {
+      "oanda/foundation/rick_charter.py": true
+    },
+    {
+      "oanda/brokers/oanda_connector.py": true
+    },
+    {
+      "rick_institutional_full.py": true
+    },
+    {
+      "rick_hive/guardian_gates.py": true
+    },
+    {
+      "util/narration_logger.py": true
+    }
+  ],
+  "python_version": "3.12.3 (main, Nov  6 2025, 13:44:16) [GCC 13.3.0]",
+  "tests": null,
+  "errors": [
+    "pytest not installed - skip tests"
+  ],
+  "narration_summary": [
+    "No narration file found: narration.jsonl"
+  ],
+  "env_example_present": true
+}

@@ -1,0 +1,22 @@
+requests
+pyyaml
+streamlit
+pytest
+lz4
+numpy
+pandas
+pandas
+numpy
+scipy
+pytest
+scikit-learn
+requests
+praw
+vaderSentiment
+feedparser
+
+# Optional: Dotenv for local env file support
+python-dotenv
+
+coinbase-advanced-py
+ib_insync

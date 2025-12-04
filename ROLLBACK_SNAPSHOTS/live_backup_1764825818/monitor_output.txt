@@ -1,0 +1,9 @@
+2025-12-02 12:52:22,552 - session_breaker - INFO - Session Breaker Engine initialized
+2025-12-02 12:52:22,552 - session_breaker - INFO - P&L threshold: -5.0%
+2025-12-02 12:52:22,552 - session_breaker - INFO - Consecutive trigger limit: 3
+2025-12-02 12:52:22,552 - session_breaker - INFO - Session reset hours: 24
+2025-12-02 12:52:22,552 - session_breaker - INFO - Monitoring interval: 60s
+2025-12-02 12:52:22,553 - oanda.brokers.oanda_connector - WARNING - OANDA practice token not configured in .env
+2025-12-02 12:52:22,553 - oanda.brokers.oanda_connector - INFO - OandaConnector initialized for practice environment
+2025-12-02 12:52:22,553 - oanda.brokers.oanda_connector - WARNING - Practice OANDA credentials not configured - using simulation mode
+2025-12-02 12:52:22,642 - oanda.brokers.oanda_connector - ERROR - OANDA API ERROR (practice): HTTP 400: {"errorMessage":"Invalid value specified for 'accountID'"}

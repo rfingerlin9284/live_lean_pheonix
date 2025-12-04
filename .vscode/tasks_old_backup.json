@@ -1,0 +1,49 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Update secret",
+      "type": "shell",
+      "command": "./scripts/update_secret.sh",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Confirm CANARY Mode",
+      "type": "shell",
+      "command": "python3 -c \"from util.mode_manager import switch_mode; switch_mode('CANARY')\"",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": [],
+      "detail": "Switches the system to CANARY mode for validation."
+    },
+    {
+      "label": "Activate Live Trading Dashboard",
+      "type": "shell",
+      "command": "python3 -c \"from util.mode_manager import switch_mode; switch_mode('LIVE', pin=841921)\"",
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      },
+      "problemMatcher": [],
+      "detail": "Switches the system to LIVE mode and activates the dashboard."
+    },
+    {
+      "label": "Run Dashboard",
+      "type": "shell",
+      "command": "python3 dashboard/app.py",
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      },
+      "problemMatcher": [],
+      "detail": "Runs the web dashboard for live monitoring."
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+{
+  "name": "Rick Phoenix Command Node",
+  "description": "A central command interface for the Rick Phoenix Autonomous Trading System. Manages agent charters, platform status (Oanda, Coinbase, IBKR), and generates enforced prompts for the Raptor agent.",
+  "requestFramePermissions": []
+}

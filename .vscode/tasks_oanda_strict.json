@@ -1,0 +1,88 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "🔍 Charter & Wiring Status Audit",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-lc",
+        "set -euo pipefail; python3 - <<'PY'\nimport sys\nok=True\ntry:\n    import foundation.rick_charter as f\n    print(\"foundation.rick_charter:\", getattr(f,'RickCharter',None).MIN_NOTIONAL_USD, getattr(f,'RickCharter',None).MIN_EXPECTED_PNL_USD)\nexcept Exception as e:\n    ok=False; print(\"[RED] foundation.rick_charter load error:\", e)\ntry:\n    import rick_charter as r\n    print(\"rick_charter:\", getattr(r,'MIN_NOTIONAL_USD',None), getattr(r,'MIN_EXPECTED_PNL_USD',None))\nexcept Exception as e:\n    ok=False; print(\"[RED] rick_charter load error:\", e)\nsys.exit(0 if ok else 2)\nPY\n; echo \"--- OANDA Connector Guards ---\"; grep -n \"EXPECTED_PNL_BELOW_MIN\" brokers/oanda_connector.py || echo \"[RED] Missing PnL guard in OANDA\"; grep -n \"MIN_NOTIONAL\" brokers/oanda_connector.py || echo \"[RED] Missing min-notional ref in OANDA\"; echo \"--- OCO Requirements ---\"; grep -inE \"\\boco\\b|take_profit|stop_loss\" brokers/oanda_connector.py oanda_trading_engine.py | head -n 10 || true; echo \"--- Process Check ---\"; pgrep -af oanda_trading_engine.py || echo \"(engine not running)\"; echo \"=== AUDIT COMPLETE ===\""
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "focus": true
+      }
+    },
+    {
+      "label": "🚀 Start STRICT Engine (practice)",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-lc",
+        "set -euo pipefail; set +u; [ -f .env ] && set -a && . ./.env && set +a || true; [ -f master.env ] && set -a && . ./master.env && set +a || true; set -u; [ -n \"${OANDA_PRACTICE_TOKEN:-}\" ] && [ -n \"${OANDA_PRACTICE_ACCOUNT_ID:-}\" ] || (echo \"[RED] Missing OANDA_PRACTICE_TOKEN or OANDA_PRACTICE_ACCOUNT_ID\"; exit 2); pkill -f autonomous_decision_engine.py || true; python3 oanda_trading_engine.py --env practice"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "focus": true
+      }
+    },
+    {
+      "label": "🛑 Stop All",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-lc",
+        "pkill -f \"oanda_trading_engine.py|autonomous_decision_engine.py\" || true; echo Stopped."
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "focus": false
+      }
+    },
+    {
+      "label": "🔒 Lock Charter Files (chmod)",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-lc",
+        "set -e; for f in foundation/rick_charter.py rick_charter.py brokers/oanda_connector.py; do [ -f \"$f\" ] && chmod a-w \"$f\" || true; done; echo Locked read-only."
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "focus": false
+      }
+    },
+    {
+      "label": "📜 Tail OANDA Narration",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-lc",
+        "mkdir -p logs; touch logs/narration.jsonl; python3 tools/pretty_narration.py logs/narration.jsonl | grep -E \"CHARTER_VIOLATION|EXPECTED_PNL_BELOW_MIN|MIN_NOTIONAL|OANDA\" || tail -f logs/narration.jsonl"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "focus": false
+      }
+    },
+    {
+      "label": "🚫 DISABLED – Bootstrap (blocked)",
+      "type": "shell",
+      "command": "echo",
+      "args": [
+        "❌ Bootstrap engine is DISABLED. Use 'Start STRICT Engine (practice)' instead. Bootstrap allows sub-$15k trades which violates charter."
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "focus": false
+      }
+    }
+  ]
+}

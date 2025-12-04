@@ -1,0 +1,19 @@
+# Canary settings for connectors
+coinbase:
+  enabled: true
+  mode: canary
+  min_profitable_pct: 0.02   # min profit target to enable live
+  max_drawdown_pct: 0.05     # max drawdown before disabling live
+  canary_trade_count: 10     # number of successful trades to consider canary success
+  simulation_only: true
+
+ibkr:
+  enabled: true
+  mode: practice
+  simulation_only: true
+  notes: "IBKR connector needs broker-specific config; default to practice until canary success"
+
+oanda:
+  enabled: true
+  mode: practice
+  simulation_only: false

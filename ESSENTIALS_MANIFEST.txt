@@ -1,0 +1,30 @@
+# ESSENTIALS_MANIFEST.txt
+
+This file lists all folders and files required for the OANDA engine to operate in live and practice modes. Any agent or process should leave these untouched.
+
+## Essential Folders
+- oanda/
+- util/
+- utils/
+- .vscode/
+- tests/ (if OANDA tests are needed)
+- ibkr/ (stub, if needed)
+- coinbase/ (stub, if needed)
+
+## Essential Files
+- .env
+- .env.oanda_only
+- .env.live
+- .env.paper
+- requirements.txt
+- start_with_integrity.sh
+- start_oanda_practice.sh
+- narration_self_repair.py
+- pretty_print_narration.py
+- active_trade_monitor.py
+- system_watchdog.py
+
+## Notes
+- Only these files/folders are required for OANDA engine operation and monitoring.
+- All other files/folders can be considered legacy and archived/moved as needed.
+- Update this manifest if you add/remove essentials.

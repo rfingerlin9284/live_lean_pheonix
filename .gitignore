@@ -1,0 +1,40 @@
+# Credentials - NEVER commit
+.env
+*.env
+!example.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+build/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs and temp
+logs/
+*.log
+tmp/
+tmp_*/
+*.bak
+
+# Archives and backups
+archives/
+backups/
+
+# Database
+*.db
+*.sqlite
+
+# OS
+.DS_Store
+Thumbs.db
