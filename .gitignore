@@ -1,40 +1,47 @@
-# Credentials - NEVER commit
-.env
-*.env
-!example.env
-
-# Python
+# Large files and temporary data
+*.tar.gz
+*.zip
+-C
+legacy_code/tmp_pack_*
+.pytest_cache/
 __pycache__/
-*.py[cod]
-*$py.class
-.venv/
-venv/
-env/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
 *.egg-info/
 dist/
 build/
+*.log
+.env
+.env.*
+!.env.example
+!.env.paper
+*.pid
+.venv/
+venv/
+env/
 
 # IDE
+.vscode/*
+!.vscode/tasks.json
 .idea/
-.vscode/
-*.swp
-*.swo
-
-# Logs and temp
-logs/
-*.log
-tmp/
-tmp_*/
-*.bak
-
-# Archives and backups
-archives/
-backups/
-
-# Database
-*.db
-*.sqlite
 
 # OS
 .DS_Store
 Thumbs.db
+
+# Secrets
+ssh_key
+ssh_key.pub
+*.gpg
+*_secret*
+
+# Temporary
+tmp/
+temp/
+*.tmp
+*.swp
+*.swo
