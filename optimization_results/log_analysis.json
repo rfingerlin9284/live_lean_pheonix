@@ -1,0 +1,97 @@
+{
+  "generated_at": "2025-12-05T00:14:29.671576",
+  "analysis_period_hours": 24,
+  "total_log_entries": 0,
+  "strategies": {
+    "wolfpack": {
+      "performance": {
+        "strategy_name": "wolfpack",
+        "total_trades": 0,
+        "winning_trades": 0,
+        "losing_trades": 0,
+        "win_rate": 0,
+        "avg_profit": 0,
+        "avg_loss": 0,
+        "profit_factor": 0,
+        "total_pnl": 0,
+        "max_drawdown": 0,
+        "sharpe_ratio": 0,
+        "avg_hold_time_minutes": 0,
+        "best_pairs": [],
+        "worst_pairs": [],
+        "best_timeframes": [],
+        "parameter_insights": {}
+      },
+      "recommendations": [
+        {
+          "parameter_name": "confidence_threshold",
+          "current_value": 0.55,
+          "recommended_value": 0.65,
+          "expected_improvement": 0.15,
+          "confidence": 0.75,
+          "reasoning": "Win rate below 45% - increase confidence threshold to filter weak signals"
+        }
+      ]
+    },
+    "quant_hedge": {
+      "performance": {
+        "strategy_name": "quant_hedge",
+        "total_trades": 0,
+        "winning_trades": 0,
+        "losing_trades": 0,
+        "win_rate": 0,
+        "avg_profit": 0,
+        "avg_loss": 0,
+        "profit_factor": 0,
+        "total_pnl": 0,
+        "max_drawdown": 0,
+        "sharpe_ratio": 0,
+        "avg_hold_time_minutes": 0,
+        "best_pairs": [],
+        "worst_pairs": [],
+        "best_timeframes": [],
+        "parameter_insights": {}
+      },
+      "recommendations": [
+        {
+          "parameter_name": "confidence_threshold",
+          "current_value": 0.55,
+          "recommended_value": 0.65,
+          "expected_improvement": 0.15,
+          "confidence": 0.75,
+          "reasoning": "Win rate below 45% - increase confidence threshold to filter weak signals"
+        }
+      ]
+    },
+    "strategic_hedge": {
+      "performance": {
+        "strategy_name": "strategic_hedge",
+        "total_trades": 0,
+        "winning_trades": 0,
+        "losing_trades": 0,
+        "win_rate": 0,
+        "avg_profit": 0,
+        "avg_loss": 0,
+        "profit_factor": 0,
+        "total_pnl": 0,
+        "max_drawdown": 0,
+        "sharpe_ratio": 0,
+        "avg_hold_time_minutes": 0,
+        "best_pairs": [],
+        "worst_pairs": [],
+        "best_timeframes": [],
+        "parameter_insights": {}
+      },
+      "recommendations": [
+        {
+          "parameter_name": "confidence_threshold",
+          "current_value": 0.55,
+          "recommended_value": 0.65,
+          "expected_improvement": 0.15,
+          "confidence": 0.75,
+          "reasoning": "Win rate below 45% - increase confidence threshold to filter weak signals"
+        }
+      ]
+    }
+  }
+}

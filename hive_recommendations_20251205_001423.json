@@ -1,0 +1,22 @@
+{
+  "generated_at": "2025-12-05T00:14:23.111544",
+  "optimized_parameters": {
+    "confidence_threshold": 0.55,
+    "stop_loss_pips": 10,
+    "take_profit_pips": 38,
+    "max_positions": 8,
+    "momentum_weight": 0.5,
+    "fvg_weight": 0.30000000000000004,
+    "fibonacci_weight": 0.30000000000000004
+  },
+  "consensus_confidence": 0.1675,
+  "contributing_agents": [
+    "FVGSpecialist",
+    "FibonacciExpert",
+    "RiskManager",
+    "TrendAnalyst"
+  ],
+  "expected_improvement": 0.12648809523809526,
+  "backtest_score": 61.7,
+  "reasoning": "take_profit_pips: Improve R:R from 3.2:1 to 3.8:1; max_positions: Reduce drawdown exposure (current DD: $500.00); momentum_weight: Increase momentum filter to reduce false signals; fvg_weight: High volatility environment - increase FVG signal weight; fibonacci_weight: Sideways market - fibonacci levels more reliable"
+}
