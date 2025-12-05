@@ -15,16 +15,17 @@ def _mom(seq, n=10):
     return (b-a)/max(abs(a),1e-9) * 100.0
 
 def generate_signal(symbol, candles):
-    """Generate BUY/SELL signal with confidence
+    """Generate BUY/SELL signal with confidence and metadata
     
     Args:
         symbol: Trading pair (e.g., "EUR_USD")
         candles: List of OANDA candle dicts with 'mid': {'c': close_price}
         
     Returns:
-        (signal, confidence) where:
+        (signal, confidence, meta) where:
             signal: "BUY", "SELL", or None
             confidence: 0.0 to 1.0
+            meta: dict with additional signal metadata
     """
     # Extract closes from OANDA candle format
     closes = []
@@ -38,20 +39,32 @@ def generate_signal(symbol, candles):
     closes = [x for x in closes if x > 0][-100:]  # Last 100 valid closes
     
     if len(closes) < 30:
-        return (None, 0.0)
+        return (None, 0.0, {})
     
     # Calculate indicators
     s20 = _sma(closes, 20)
     s50 = _sma(closes, 50)
     m10 = _mom(closes, 10)
     
+    # Prepare metadata
+    meta = {
+        'sma20': s20,
+        'sma50': s50,
+        'momentum': m10,
+        'symbol': symbol,
+        'candle_count': len(closes)
+    }
+    
     # Trend + momentum confirmation
     if s20 > s50 and m10 > 0.15:  # Bullish trend + positive momentum
         confidence = min(abs(m10)/2, 1.0)
-        return ("BUY", confidence)
+        meta['signal_type'] = 'bullish_momentum'
+        return ("BUY", confidence, meta)
     
     if s20 < s50 and m10 < -0.15:  # Bearish trend + negative momentum
         confidence = min(abs(m10)/2, 1.0)
-        return ("SELL", confidence)
+        meta['signal_type'] = 'bearish_momentum'
+        return ("SELL", confidence, meta)
     
-    return (None, 0.0)
+    meta['signal_type'] = 'no_signal'
+    return (None, 0.0, meta)

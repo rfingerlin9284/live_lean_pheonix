@@ -38,7 +38,7 @@ def test_oanda_place_trade_with_aggressive_plan(monkeypatch):
     engine.oanda = FakeOanda()
     # Force generate_signal to always return BUY with high confidence (monkeypatch)
     def fake_gen(sym, candles):
-        return ('BUY', 0.99)
+        return ('BUY', 0.99, {'signal_type': 'test_bullish'})
     monkeypatch.setattr('systems.momentum_signals.generate_signal', fake_gen, raising=False)
 
     # Attempt to place trade

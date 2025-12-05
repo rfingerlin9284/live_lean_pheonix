@@ -1579,7 +1579,7 @@ class OandaTradingEngine:
                             candles = self.oanda.get_historical_data(_candidate, count=120, granularity="M15")
                             
                             # STEP 1: Get base momentum signal
-                            sig, conf = generate_signal(_candidate, candles)  # returns ("BUY"/"SELL", confidence) or (None, 0)
+                            sig, conf, meta = generate_signal(_candidate, candles)  # returns ("BUY"/"SELL", confidence, meta) or (None, 0, {})
                             
                             if not sig or sig not in ("BUY", "SELL"):
                                 continue

@@ -78,7 +78,7 @@ NEW_ENSURE_METHOD = r'''    def ensure_min_unique_pairs(self):
                 continue
             try:
                 candles = self.oanda.get_historical_data(_candidate, count=120, granularity="M15")
-                sig, conf = generate_signal(_candidate, candles)
+                sig, conf, _ = generate_signal(_candidate, candles)
             except Exception as e:
                 self.display.error(f"Signal error for {_candidate}: {e}")
                 continue
