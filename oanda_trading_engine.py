@@ -1584,6 +1584,19 @@ class OandaTradingEngine:
                             if not sig or sig not in ("BUY", "SELL"):
                                 continue
                             
+                            # Log signal metadata for telemetry
+                            log_narration(
+                                event_type="SIGNAL_GENERATED",
+                                details={
+                                    "symbol": _candidate,
+                                    "signal": sig,
+                                    "confidence": conf,
+                                    "signal_metadata": meta
+                                },
+                                symbol=_candidate,
+                                venue="oanda"
+                            )
+                            
                             # Get entry price for subsequent gates
                             price_data = self.get_current_price(_candidate)
                             entry_price = price_data['ask'] if sig == "BUY" else price_data['bid'] if price_data else 0

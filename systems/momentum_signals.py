@@ -39,7 +39,7 @@ def generate_signal(symbol, candles):
     closes = [x for x in closes if x > 0][-100:]  # Last 100 valid closes
     
     if len(closes) < 30:
-        return (None, 0.0, {})
+        return (None, 0.0, {'symbol': symbol, 'candle_count': len(closes), 'signal_type': 'insufficient_data'})
     
     # Calculate indicators
     s20 = _sma(closes, 20)
