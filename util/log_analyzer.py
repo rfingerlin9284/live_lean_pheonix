@@ -10,7 +10,7 @@ import logging
 import numpy as np
 import pandas as pd
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Any
 from dataclasses import dataclass, asdict
 from pathlib import Path
 from collections import defaultdict
@@ -36,15 +36,15 @@ class StrategyPerformance:
     best_pairs: List[Tuple[str, float]]  # (pair, win_rate)
     worst_pairs: List[Tuple[str, float]]
     best_timeframes: List[Tuple[str, float]]
-    parameter_insights: Dict[str, any]
+    parameter_insights: Dict[str, Any]
 
 
 @dataclass
 class ParameterRecommendation:
     """Recommended parameter adjustments"""
     parameter_name: str
-    current_value: any
-    recommended_value: any
+    current_value: Any
+    recommended_value: Any
     expected_improvement: float
     confidence: float
     reasoning: str

@@ -80,7 +80,7 @@ class TradingOpportunity:
     stop_loss: float
     take_profit: float
     reasoning: str
-    signals: Dict[str, any]
+    signals: Dict[str, Any]
     risk_reward_ratio: float
     timeframe: str
     detected_at: datetime

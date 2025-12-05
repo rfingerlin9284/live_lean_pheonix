@@ -8,7 +8,7 @@ PIN: 841921 | Phase: Hive Analysis
 
 import logging
 import numpy as np
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Any
 from dataclasses import dataclass, asdict
 from datetime import datetime
 import json
@@ -22,13 +22,13 @@ class HiveAgent:
     name: str
     specialty: str
     weight: float  # Influence weight (0-1)
-    recommendations: List[Dict]
+    recommendations: List[Dict[str, Any]]
 
 
 @dataclass
 class OptimizedParameters:
     """Optimized parameter set with hive consensus"""
-    parameters: Dict[str, any]
+    parameters: Dict[str, Any]
     consensus_confidence: float
     contributing_agents: List[str]
     expected_improvement: float
@@ -107,8 +107,8 @@ class HiveParameterOptimizer:
     
     def optimize_with_hive(
         self,
-        current_params: Dict[str, any],
-        performance_data: Dict[str, any],
+        current_params: Dict[str, Any],
+        performance_data: Dict[str, Any],
         market_conditions: Optional[Dict] = None
     ) -> OptimizedParameters:
         """
@@ -150,7 +150,7 @@ class HiveParameterOptimizer:
         current_params: Dict,
         performance: Dict,
         market: Optional[Dict]
-    ) -> List[Dict]:
+    ) -> List[Dict[str, Any]]:
         """
         Agent-specific analysis and recommendations
         
