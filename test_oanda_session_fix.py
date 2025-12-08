@@ -51,7 +51,7 @@ def test_session_display():
     
     # Assertions
     assert session_status == "active", f"Expected 'active', got '{session_status}'"
-    assert is_active == True, f"Expected True, got {is_active}"
+    assert is_active, f"Expected True, got {is_active}"
     assert len(active_strategies) == 5, f"Expected 5 strategies, got {len(active_strategies)}"
     
     print("\n✅ PASS: Practice mode shows active session with strategies")

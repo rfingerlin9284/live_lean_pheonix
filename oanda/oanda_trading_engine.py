@@ -96,9 +96,17 @@ class OandaTradingEngine:
 			manager = MarketHoursManager()
 			is_open = manager.is_forex_open()
 			return "active" if is_open else "off_hours"
-		except Exception:
+		except (ImportError, AttributeError) as e:
 			# If market hours manager not available, default to active
+			logger.debug(f"Market hours manager not available: {e}")
 			return "active"
+	
+	def get_session_status(self):
+		"""Get current session status, activity flag, and active strategies"""
+		session_status = "active" if self.environment == 'practice' else self._check_market_hours()
+		is_active = True if self.environment == 'practice' else session_status == "active"
+		active_strategies = self.TRADING_PAIRS if is_active else []
+		return session_status, is_active, active_strategies
 
 	async def run(self):
 		self.running = True
@@ -114,10 +122,8 @@ class OandaTradingEngine:
 				self.active_positions = {t['id']: t for t in trades}
 				self.display.info('Active Positions', str(len(self.active_positions)))
 				
-				# Display session status - always active for practice mode
-				session_status = "active" if self.environment == 'practice' else self._check_market_hours()
-				is_active = True if self.environment == 'practice' else session_status == "active"
-				active_strategies = self.TRADING_PAIRS if is_active else []
+				# Display session status
+				session_status, is_active, active_strategies = self.get_session_status()
 				self.display.info('Session', f'{session_status} | Active: {is_active} | Strategies: {active_strategies}')
 				
 				# Display ATR trailing updates for active positions
