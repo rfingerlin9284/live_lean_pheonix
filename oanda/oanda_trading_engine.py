@@ -97,9 +97,11 @@ class OandaTradingEngine:
 			is_open = manager.is_forex_open()
 			return "active" if is_open else "off_hours"
 		except (ImportError, AttributeError) as e:
-			# If market hours manager not available, default to active
+			# If market hours manager not available
 			logger.debug(f"Market hours manager not available: {e}")
-			return "active"
+			# For live mode, default to off_hours for safety
+			# For practice mode, this won't be called anyway
+			return "off_hours" if self.environment == 'live' else "active"
 	
 	def get_session_status(self):
 		"""Get current session status, activity flag, and active strategies"""
@@ -122,7 +124,7 @@ class OandaTradingEngine:
 				self.active_positions = {t['id']: t for t in trades}
 				self.display.info('Active Positions', str(len(self.active_positions)))
 				
-				# Display session status
+				# Get and display session status (used for both display and trading logic)
 				session_status, is_active, active_strategies = self.get_session_status()
 				self.display.info('Session', f'{session_status} | Active: {is_active} | Strategies: {active_strategies}')
 				
@@ -138,8 +140,8 @@ class OandaTradingEngine:
 				# Police enforcement
 				self._run_police()
 
-				# Place new trades if capacity allows
-				if len(self.active_positions) < self.MAX_POSITIONS:
+				# Place new trades if capacity allows and session is active
+				if is_active and len(self.active_positions) < self.MAX_POSITIONS:
 					for symbol in self.TRADING_PAIRS:
 						if any((t.get('instrument') or t.get('symbol')) == symbol for t in trades):
 							continue
