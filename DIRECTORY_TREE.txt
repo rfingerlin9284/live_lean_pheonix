@@ -1,0 +1,189 @@
+================================================================================
+DIRECTORY TREE STRUCTURE - live_lean_pheonix Repository
+================================================================================
+Generated: 2025-12-08
+Repository Overview: Trading system with multi-broker support
+================================================================================
+
+.
+├── CONSOLIDATED_STRATEGIES
+├── PHOENIX_EXPORT
+├── PHOENIX_V2
+│   └── src
+├── PhoenixV2
+│   ├── backtest
+│   ├── brain
+│   ├── config
+│   ├── core
+│   ├── execution
+│   ├── gate
+│   ├── interface
+│   ├── operations
+│   ├── scripts
+│   └── tests
+├── RICK_PHOENIX_SNAPSHOT
+│   ├── PhoenixV2
+│   ├── backtest_results
+│   ├── docs
+│   ├── rick_hive
+│   └── tests
+├── ROLLBACK_SNAPSHOTS
+│   ├── crypto_live_backup_1760739129
+│   ├── live_backup_1760728038
+│   ├── live_backup_1764825818
+│   └── pre_restore_1761879894
+├── _TEMPLATES
+├── _archive_docs
+├── _archive_scripts
+├── _legacy_code
+├── a_zip_file_segments
+│   └── rick_system_zip
+├── archived_simulations
+├── audit_report
+│   └── audit logs 12-2-25
+├── audits
+│   └── 2025-12-02_0500_1400
+├── backtest
+├── backtest_results
+├── blueprints
+├── bridges
+├── brokers
+├── coinbase_advanced
+├── components
+├── config
+│   └── tests
+├── configs
+├── connectors
+│   └── futures
+├── construction_logs
+├── controller
+├── core
+├── dashboard
+├── data
+│   └── demo
+├── dev_candidates
+│   └── rick_extracted
+├── docs
+│   └── hedge_restore_commit
+├── engine
+├── engines
+├── export
+│   └── RBOTZILLA_TELEMETRY_20251107_014338_READONLY
+├── export_gemini_minimal
+│   ├── bridges
+│   ├── brokers
+│   ├── config
+│   ├── foundation
+│   ├── oanda
+│   ├── rick_hive
+│   ├── tests
+│   ├── tools
+│   └── util
+├── exports
+│   └── gemini_version
+├── final_v001
+│   └── merged_upgrade
+├── foundation
+├── hive
+├── hive_dashboard
+│   └── scripts
+├── hooks
+├── ibkr
+│   └── brokers
+├── ibkr_gateway
+├── install_test_backups
+├── logic
+├── ml_learning
+├── oanda
+│   ├── brokers
+│   ├── foundation
+│   └── strategies
+├── ops
+│   └── systemd
+├── orchestration
+├── policies
+├── prompts
+├── rbot_arena
+│   └── backend
+├── reports
+├── research_strategies
+├── results
+│   ├── demo_ci
+│   ├── full_test
+│   └── packtest
+├── rick_hive
+├── rick_intelligence_extracted
+├── risk
+├── runtime_guard
+├── scripts
+│   └── git_hooks
+├── sent_to_windows_files_and_folders
+│   ├── RICK_LIVE_PROTOTYPE
+│   ├── R_H_UNI
+│   └── prototype
+├── services
+├── status
+├── strategies
+├── strategies_new
+├── swarm
+├── systems
+├── tasks
+├── temp_extracted_data
+├── tests
+├── tools
+├── unified_system_v1.0
+├── util
+├── wolf_packs
+├── ≡ƒö┤_DOCUMENTATION_HUB_≡ƒö┤
+└── 🔴_DOCUMENTATION_HUB_🔴
+
+131 directories
+
+================================================================================
+Key Directories Summary
+================================================================================
+
+Core Trading Components:
+  /oanda/          - OANDA broker integration
+  /brokers/        - Multi-broker connector implementations
+  /systems/        - Trading systems and strategies
+  /strategies/     - Strategy implementations
+  
+Risk & Portfolio Management:
+  /risk/           - Risk management modules
+  /capital/        - Capital allocation
+  
+Engines & Orchestration:
+  /engines/        - Trading engines
+  /orchestration/  - System orchestration
+  /engine/         - Core engine components
+  
+Testing & Quality:
+  /tests/          - Test suites
+  /PhoenixV2/tests/ - Phoenix V2 tests
+  
+UI & Monitoring:
+  /dashboard/      - Web dashboards
+  /hive_dashboard/ - Hive mind monitoring
+  
+Support & Utilities:
+  /scripts/        - Utility scripts
+  /tools/          - Development tools
+  /util/           - Utility functions
+  
+Architecture:
+  /core/           - Core system components
+  /foundation/     - Foundation modules
+  /components/     - Reusable components
+  
+Data & Configuration:
+  /data/           - Data files
+  /config/         - Configuration files
+  /configs/        - Additional configs
+  
+Backups & Archives:
+  /ROLLBACK_SNAPSHOTS/ - System snapshots
+  /_archive_docs/      - Archived documentation
+  /_archive_scripts/   - Archived scripts
+  /_legacy_code/       - Legacy code
+
