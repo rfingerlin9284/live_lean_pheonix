@@ -88,6 +88,17 @@ class OandaTradingEngine:
 			_rbz_force_min_notional_position_police(account_id=self.oanda.account_id, token=self.oanda.api_token, api_base=self.oanda.api_base)
 		except Exception as e:
 			logger.warning('Position police error: %s', e)
+	
+	def _check_market_hours(self):
+		"""Check if Forex market is currently open (for live mode)"""
+		try:
+			from util.market_hours_manager import MarketHoursManager
+			manager = MarketHoursManager()
+			is_open = manager.is_forex_open()
+			return "active" if is_open else "off_hours"
+		except Exception:
+			# If market hours manager not available, default to active
+			return "active"
 
 	async def run(self):
 		self.running = True
@@ -102,6 +113,21 @@ class OandaTradingEngine:
 				trades = self.oanda.get_trades() or []
 				self.active_positions = {t['id']: t for t in trades}
 				self.display.info('Active Positions', str(len(self.active_positions)))
+				
+				# Display session status - always active for practice mode
+				session_status = "active" if self.environment == 'practice' else self._check_market_hours()
+				is_active = True if self.environment == 'practice' else session_status == "active"
+				active_strategies = self.TRADING_PAIRS if is_active else []
+				self.display.info('Session', f'{session_status} | Active: {is_active} | Strategies: {active_strategies}')
+				
+				# Display ATR trailing updates for active positions
+				for trade in trades:
+					symbol = trade.get('instrument') or trade.get('symbol')
+					sl_order = trade.get('stopLossOrder') or {}
+					current_sl = sl_order.get('price')
+					if current_sl and symbol:
+						# This will show the current trailing stop level
+						self.display.info('ATR Trail', f'{symbol}: {current_sl}')
 
 				# Police enforcement
 				self._run_police()
