@@ -1,111 +1,173 @@
-
 {
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Check Narration (tools)",
+      "label": "🚀 OANDA Trading Engine (Practice)",
       "type": "shell",
-      "command": "python3 ${workspaceFolder}/tools/check_narration_counts.py",
-      "presentation": { "echo": true, "reveal": "always", "panel": "dedicated" },
-      "problemMatcher": []
-    },
-    {
-      "label": "Run OANDA Engine (Practice)",
-      "type": "shell",
-      "command": "bash -lc \"OANDA_LOAD_ENV_FILE=1 RICK_ENV=practice python3 ${workspaceFolder}/oanda/oanda_trading_engine.py\"",
+      "command": "bash -lc \"RICK_ENV=practice python3 ${workspaceFolder}/oanda_trading_engine.py\"",
       "isBackground": true,
-      "presentation": { "echo": true, "reveal": "always", "panel": "dedicated" },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "dedicated",
+        "showReuseMessage": false,
+        "clear": false
+      },
       "problemMatcher": []
     },
     {
-      "label": "Run OANDA Engine (Practice - Simplify)",
+      "label": "🔴 OANDA Trading Engine (LIVE)",
       "type": "shell",
-      "command": "bash -lc \"SIMPLIFY_MODE=1 OANDA_LOAD_ENV_FILE=1 RICK_ENV=practice python3 ${workspaceFolder}/oanda/oanda_trading_engine.py\"",
+      "command": "bash -lc \"RICK_ENV=live python3 ${workspaceFolder}/oanda_trading_engine.py\"",
       "isBackground": true,
-      "presentation": { "echo": true, "reveal": "always", "panel": "dedicated" },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "dedicated",
+        "showReuseMessage": false,
+        "clear": false
+      },
       "problemMatcher": []
     },
     {
-      "label": "Run OANDA Engine (Live)",
+      "label": "💰 Coinbase Trading Engine (Safe Mode)",
       "type": "shell",
-      "command": "bash -lc \"OANDA_LOAD_ENV_FILE=1 RICK_ENV=live python3 ${workspaceFolder}/oanda/oanda_trading_engine.py\"",
+      "command": "bash -lc \"RICK_ENV=practice python3 ${workspaceFolder}/coinbase_safe_mode_engine.py\"",
       "isBackground": true,
-      "presentation": { "echo": true, "reveal": "always", "panel": "dedicated" },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "dedicated",
+        "showReuseMessage": false,
+        "clear": false
+      },
       "problemMatcher": []
     },
     {
-      "label": "Run Charter Gate Tests",
+      "label": "🔴 Coinbase Trading Engine (LIVE)",
       "type": "shell",
-      "command": "bash -lc \"python3 -m pytest -q ${workspaceFolder}/tests/test_charter_gates.py || python3 ${workspaceFolder}/tests/test_charter_gates.py\"",
-      "presentation": { "echo": true, "reveal": "always", "panel": "shared" },
-      "group": "test",
+      "command": "bash -lc \"RICK_ENV=live python3 ${workspaceFolder}/coinbase_safe_mode_engine.py\"",
+      "isBackground": true,
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "dedicated",
+        "showReuseMessage": false,
+        "clear": false
+      },
       "problemMatcher": []
     },
     {
-      "label": "Tail Narration (follow)",
+      "label": "📡 Persistent Monitor (System Watchdog)",
+      "type": "shell",
+      "command": "bash -c 'while true; do clear; python3 ${workspaceFolder}/system_watchdog.py 2>&1 || echo \"Watchdog error - retrying in 30s\"; sleep 30; done'",
+      "isBackground": true,
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "dedicated",
+        "showReuseMessage": false,
+        "clear": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "📊 Live Narration Feed (Auto-refresh)",
+      "type": "shell",
+      "command": "bash ${workspaceFolder}/scripts/narration_feed.sh narration.jsonl",
+      "isBackground": true,
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "dedicated",
+        "showReuseMessage": false,
+        "clear": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🔍 Engine Parameters Diagnostic",
+      "type": "shell",
+      "command": "bash -c 'echo \"=== OANDA ENGINE PARAMETERS ===\";\necho \"\";\necho \"Current Environment Settings:\";\necho \"  RICK_ENV: ${RICK_ENV:-not set}\";\necho \"  OANDA_ENV (from .env): $(grep RICK_ENV ${workspaceFolder}/.env 2>/dev/null | cut -d= -f2)\";\necho \"\";\necho \"OANDA Configuration:\";\necho \"  Practice Account: $(grep OANDA_PRACTICE_ACCOUNT_ID ${workspaceFolder}/.env 2>/dev/null | cut -d= -f2)\";\necho \"  Practice Token: $(grep OANDA_PRACTICE_TOKEN ${workspaceFolder}/.env 2>/dev/null | cut -d= -f2 | sed \"s/./*/g\")\";\necho \"  Practice URL: $(grep OANDA_PRACTICE_BASE_URL ${workspaceFolder}/.env 2>/dev/null | cut -d= -f2)\";\necho \"\";\necho \"Live Toggle Status:\";\nif [ -f ${workspaceFolder}/.upgrade_toggle ]; then\n  echo \"  Toggle file content: $(cat ${workspaceFolder}/.upgrade_toggle)\";\nelse\n  echo \"  Toggle file: NOT FOUND\";\nfi;\necho \"\";\necho \"Scanning Configuration:\";\necho \"  Instruments: $(grep ^INSTRUMENTS= ${workspaceFolder}/.env 2>/dev/null | cut -d= -f2)\";\necho \"  Micro Trading: $(grep MICRO_TRADING_MODE ${workspaceFolder}/.env 2>/dev/null | cut -d= -f2)\";\necho \"\";\necho \"Process Status:\";\nps aux | grep -E \"oanda_trading_engine|system_watchdog\" | grep -v grep || echo \"  No engine processes running\";\necho \"\";\nread -p \"Press Enter to close...\"'",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "dedicated",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "⚙️ Toggle Practice/Live Environment",
+      "type": "shell",
+      "command": "bash -c 'current=$(cat ${workspaceFolder}/.env | grep ^RICK_ENV= | cut -d= -f2); echo \"Current environment: $current\"; if [ \"$current\" = \"practice\" ]; then new=\"live\"; else new=\"practice\"; fi; echo \"Switch to $new? (y/n)\"; read -r confirm; if [ \"$confirm\" = \"y\" ]; then sed -i \"s/^RICK_ENV=.*/RICK_ENV=$new/\" ${workspaceFolder}/.env; echo \"✅ Switched to $new mode\"; echo \"⚠️  Please restart the OANDA Trading Engine for changes to take effect\"; else echo \"Cancelled\"; fi; read -p \"Press Enter to close...\"'",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "dedicated",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🎯 Start Two Persistent Terminals",
+      "dependsOn": [
+        "📡 Persistent Monitor (System Watchdog)",
+        "📊 Live Narration Feed (Auto-refresh)"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "Tail Narration (Raw JSON)",
       "type": "shell",
       "command": "bash -lc \"tail -n 200 -f ${workspaceFolder}/narration.jsonl\"",
       "isBackground": true,
-      "presentation": { "echo": true, "reveal": "always", "panel": "dedicated" },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "dedicated",
+        "showReuseMessage": false
+      },
       "problemMatcher": []
     },
     {
-      "label": "Open Cheat Sheet",
+      "label": "Check Bot Status",
       "type": "shell",
-      "command": "bash -lc \"if command -v code >/dev/null 2>&1; then code -r ${workspaceFolder}/.vscode/cheatsheet.md; else sed -n '1,200p' ${workspaceFolder}/.vscode/cheatsheet.md; fi\"",
-      "presentation": { "echo": true, "reveal": "always", "panel": "dedicated" },
+      "command": "python3 ${workspaceFolder}/check_bot_status_interactive.py",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      },
       "problemMatcher": []
     },
     {
-      "label": "Export for Gemini (Downloads)",
+      "label": "🔍 Verify Engine Scanning",
       "type": "shell",
-      "command": "bash -lc \"./tools/export_for_gemini.sh\"",
-      "presentation": { "echo": true, "reveal": "always", "panel": "dedicated" },
+      "command": "python3 ${workspaceFolder}/verify_scanning.py && read -p 'Press Enter to close...'",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "dedicated",
+        "showReuseMessage": false,
+        "clear": true
+      },
       "problemMatcher": []
     },
     {
-      "label": "Update OANDA Credentials",
+      "label": "🔍 Verify Coinbase System",
       "type": "shell",
-      "command": "bash -lc \"bash ${workspaceFolder}/scripts/write_env_file.sh ${workspaceFolder}/.env.oanda_only ${workspaceFolder}/.env\"",
-      "presentation": { "echo": true, "reveal": "always", "panel": "dedicated" },
+      "command": "python3 ${workspaceFolder}/verify_coinbase.py && read -p 'Press Enter to close...'",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "dedicated",
+        "showReuseMessage": false,
+        "clear": true
+      },
       "problemMatcher": []
-    "tasks": [
-      {
-        "label": "1. Start Brain/Hive/Agent (with narration)",
-        "type": "shell",
-        "command": "./start_with_integrity.sh",
-        "presentation": { "reveal": "always", "panel": "dedicated" },
-        "isBackground": true,
-        "problemMatcher": []
-      "tasks": [
-        {
-          "label": "1. Start Brain/Hive/Agent (with narration)",
-          "type": "shell",
-          "command": "./start_with_integrity.sh",
-          "presentation": { "reveal": "always", "panel": "dedicated" },
-          "isBackground": true,
-          "problemMatcher": []
-        },
-        {
-          "label": "2. Start Sentinel+Watchdog (with fallback)",
-          "type": "shell",
-          "command": "python3 active_trade_monitor.py | tee /tmp/sentinel.log & python3 system_watchdog.py | tee /tmp/watchdog.log",
-          "presentation": { "reveal": "always", "panel": "dedicated" },
-          "isBackground": true,
-          "problemMatcher": []
-        },
-        {
-          "label": "3. Self-Repair Helper (Autonomous)",
-          "type": "shell",
-          "command": "python3 narration_self_repair.py",
-          "presentation": { "reveal": "always", "panel": "dedicated" },
-          "problemMatcher": []
-        },
-        {
-          "label": "4. Fallback to Raw Data (Automatic)",
-          "type": "shell",
-          "command": "echo 'Fallback: Showing raw trade info only. System remains connected.'",
-          "presentation": { "reveal": "always", "panel": "dedicated" },
-          "problemMatcher": []
-        }
-      ]
+    }
+  ]
+}
