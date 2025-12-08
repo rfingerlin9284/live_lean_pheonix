@@ -53,6 +53,7 @@ class OandaTradingEngine:
 		self.TRAILING_START_PIPS = 3
 		self.TRAILING_DIST_PIPS = 5
 		self.TRADING_PAIRS = ['EUR_USD', 'GBP_USD', 'USD_JPY', 'AUD_USD', 'USD_CAD']
+		self.TRAIL_DISPLAY_THRESHOLD = 0.0001  # Minimum change to trigger ATR trail display
 
 		self.running = False
 		self.active_positions: Dict[str, dict] = {}
@@ -61,6 +62,8 @@ class OandaTradingEngine:
 		self.market_tick_symbol = 'EUR_USD'
 		self.market_tick_freq = 1.5  # seconds
 		self._market_tick_last_price = 1.0845
+		# ATR trail display tracking (to avoid excessive logging)
+		self._last_atr_trail_values: Dict[str, float] = {}
 
 		self._announce()
 
@@ -88,6 +91,25 @@ class OandaTradingEngine:
 			_rbz_force_min_notional_position_police(account_id=self.oanda.account_id, token=self.oanda.api_token, api_base=self.oanda.api_base)
 		except Exception as e:
 			logger.warning('Position police error: %s', e)
+	
+	def _check_market_hours(self):
+		"""Check if Forex market is currently open (for live mode only)"""
+		try:
+			from util.market_hours_manager import MarketHoursManager
+			manager = MarketHoursManager()
+			is_open = manager.is_forex_open()
+			return "active" if is_open else "off_hours"
+		except (ImportError, AttributeError) as e:
+			# If market hours manager not available, default to off_hours for safety
+			logger.debug(f"Market hours manager not available: {e}")
+			return "off_hours"
+	
+	def get_session_status(self):
+		"""Get current session status, activity flag, and active strategies"""
+		session_status = "active" if self.environment == 'practice' else self._check_market_hours()
+		is_active = True if self.environment == 'practice' else session_status == "active"
+		active_strategies = self.TRADING_PAIRS if is_active else []
+		return session_status, is_active, active_strategies
 
 	async def run(self):
 		self.running = True
@@ -102,12 +124,32 @@ class OandaTradingEngine:
 				trades = self.oanda.get_trades() or []
 				self.active_positions = {t['id']: t for t in trades}
 				self.display.info('Active Positions', str(len(self.active_positions)))
+				
+				# Get and display session status (used for both display and trading logic)
+				session_status, is_active, active_strategies = self.get_session_status()
+				self.display.info('Session', f'{session_status} | Active: {is_active} | Strategies: {active_strategies}')
+				
+				# Display ATR trailing updates for active positions (only when values change)
+				for trade in trades:
+					symbol = trade.get('instrument') or trade.get('symbol')
+					sl_order = trade.get('stopLossOrder') or {}
+					current_sl = sl_order.get('price')
+					if current_sl and symbol:
+						try:
+							current_sl_float = float(current_sl)
+							# Only display if value changed significantly
+							last_value = self._last_atr_trail_values.get(symbol)
+							if last_value is None or abs(current_sl_float - last_value) > self.TRAIL_DISPLAY_THRESHOLD:
+								self.display.info('ATR Trail', f'{symbol}: {current_sl}')
+								self._last_atr_trail_values[symbol] = current_sl_float
+						except (ValueError, TypeError):
+							pass
 
 				# Police enforcement
 				self._run_police()
 
-				# Place new trades if capacity allows
-				if len(self.active_positions) < self.MAX_POSITIONS:
+				# Place new trades if capacity allows and session is active
+				if is_active and len(self.active_positions) < self.MAX_POSITIONS:
 					for symbol in self.TRADING_PAIRS:
 						if any((t.get('instrument') or t.get('symbol')) == symbol for t in trades):
 							continue
