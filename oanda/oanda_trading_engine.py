@@ -53,6 +53,7 @@ class OandaTradingEngine:
 		self.TRAILING_START_PIPS = 3
 		self.TRAILING_DIST_PIPS = 5
 		self.TRADING_PAIRS = ['EUR_USD', 'GBP_USD', 'USD_JPY', 'AUD_USD', 'USD_CAD']
+		self.TRAIL_DISPLAY_THRESHOLD = 0.0001  # Minimum change to trigger ATR trail display
 
 		self.running = False
 		self.active_positions: Dict[str, dict] = {}
@@ -99,7 +100,7 @@ class OandaTradingEngine:
 			is_open = manager.is_forex_open()
 			return "active" if is_open else "off_hours"
 		except (ImportError, AttributeError) as e:
-			# If market hours manager not available, default to off_hours for safety in live mode
+			# If market hours manager not available, default to off_hours for safety
 			logger.debug(f"Market hours manager not available: {e}")
 			return "off_hours"
 	
@@ -136,9 +137,9 @@ class OandaTradingEngine:
 					if current_sl and symbol:
 						try:
 							current_sl_float = float(current_sl)
-							# Only display if value changed significantly (> 0.0001)
+							# Only display if value changed significantly
 							last_value = self._last_atr_trail_values.get(symbol)
-							if last_value is None or abs(current_sl_float - last_value) > 0.0001:
+							if last_value is None or abs(current_sl_float - last_value) > self.TRAIL_DISPLAY_THRESHOLD:
 								self.display.info('ATR Trail', f'{symbol}: {current_sl}')
 								self._last_atr_trail_values[symbol] = current_sl_float
 						except (ValueError, TypeError):

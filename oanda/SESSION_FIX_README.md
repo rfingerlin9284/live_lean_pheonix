@@ -29,26 +29,35 @@ self.display.info('Session', f'{session_status} | Active: {is_active} | Strategi
 #### Added Market Hours Check Method
 ```python
 def _check_market_hours(self):
-    """Check if Forex market is currently open (for live mode)"""
+    """Check if Forex market is currently open (for live mode only)"""
     try:
         from util.market_hours_manager import MarketHoursManager
         manager = MarketHoursManager()
         is_open = manager.is_forex_open()
         return "active" if is_open else "off_hours"
-    except Exception:
-        # If market hours manager not available, default to active
-        return "active"
+    except (ImportError, AttributeError) as e:
+        # If market hours manager not available, default to off_hours for safety
+        logger.debug(f"Market hours manager not available: {e}")
+        return "off_hours"
 ```
 
-#### Added ATR Trail Display
+#### Added ATR Trail Display (with rate limiting)
 ```python
-# Display ATR trailing updates for active positions
+# Display ATR trailing updates for active positions (only when values change)
 for trade in trades:
     symbol = trade.get('instrument') or trade.get('symbol')
     sl_order = trade.get('stopLossOrder') or {}
     current_sl = sl_order.get('price')
     if current_sl and symbol:
-        self.display.info('ATR Trail', f'{symbol}: {current_sl}')
+        try:
+            current_sl_float = float(current_sl)
+            # Only display if value changed significantly
+            last_value = self._last_atr_trail_values.get(symbol)
+            if last_value is None or abs(current_sl_float - last_value) > self.TRAIL_DISPLAY_THRESHOLD:
+                self.display.info('ATR Trail', f'{symbol}: {current_sl}')
+                self._last_atr_trail_values[symbol] = current_sl_float
+        except (ValueError, TypeError):
+            pass
 ```
 
 ## Expected Output

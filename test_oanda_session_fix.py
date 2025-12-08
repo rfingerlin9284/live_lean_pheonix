@@ -30,7 +30,7 @@ def test_session_display():
                 manager = MarketHoursManager()
                 is_open = manager.is_forex_open()
                 return "active" if is_open else "off_hours"
-            except Exception:
+            except (ImportError, AttributeError):
                 # If market hours manager not available, default to off_hours for safety
                 return "off_hours"
         
