@@ -154,7 +154,7 @@ class OandaTradingEngine:
 						if any((t.get('instrument') or t.get('symbol')) == symbol for t in trades):
 							continue
 						candles = self.oanda.get_historical_data(symbol, count=100, granularity='M15')
-						sig, conf = generate_signal(symbol, candles)
+						sig, conf, _ = generate_signal(symbol, candles)
 						if sig and conf >= self.MIN_CONFIDENCE:
 							await self._open_trade(symbol, sig, conf)
 							await asyncio.sleep(1)

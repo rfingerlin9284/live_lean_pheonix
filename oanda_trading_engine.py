@@ -1579,10 +1579,23 @@ class OandaTradingEngine:
                             candles = self.oanda.get_historical_data(_candidate, count=120, granularity="M15")
                             
                             # STEP 1: Get base momentum signal
-                            sig, conf = generate_signal(_candidate, candles)  # returns ("BUY"/"SELL", confidence) or (None, 0)
+                            sig, conf, meta = generate_signal(_candidate, candles)  # returns ("BUY"/"SELL", confidence, meta) or (None, 0, {})
                             
                             if not sig or sig not in ("BUY", "SELL"):
                                 continue
+                            
+                            # Log signal metadata for telemetry
+                            log_narration(
+                                event_type="SIGNAL_GENERATED",
+                                details={
+                                    "symbol": _candidate,
+                                    "signal": sig,
+                                    "confidence": conf,
+                                    "signal_metadata": meta
+                                },
+                                symbol=_candidate,
+                                venue="oanda"
+                            )
                             
                             # Get entry price for subsequent gates
                             price_data = self.get_current_price(_candidate)
