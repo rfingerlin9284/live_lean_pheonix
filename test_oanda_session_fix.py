@@ -24,15 +24,15 @@ def test_session_display():
             self.TRADING_PAIRS = ['EUR_USD', 'GBP_USD', 'USD_JPY', 'AUD_USD', 'USD_CAD']
         
         def _check_market_hours(self):
-            """Check if Forex market is currently open (for live mode)"""
+            """Check if Forex market is currently open (for live mode only)"""
             try:
                 from util.market_hours_manager import MarketHoursManager
                 manager = MarketHoursManager()
                 is_open = manager.is_forex_open()
                 return "active" if is_open else "off_hours"
             except Exception:
-                # If market hours manager not available, default to active
-                return "active"
+                # If market hours manager not available, default to off_hours for safety
+                return "off_hours"
         
         def get_session_status(self):
             """Get session status - always active for practice mode"""
@@ -64,7 +64,9 @@ def test_session_display():
     print(f"  Live Mode Is Active: {is_active}")
     print(f"  Live Mode Active Strategies: {active_strategies}")
     
-    print("\n✅ PASS: Live mode checks market hours")
+    # Note: In test environment, market hours manager may not be available,
+    # so we expect "off_hours" (fail-safe behavior) unless it's actually market hours
+    print(f"\n✅ PASS: Live mode checks market hours (status: {session_status})")
     
     return True
 

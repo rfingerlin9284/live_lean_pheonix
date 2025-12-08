@@ -61,6 +61,8 @@ class OandaTradingEngine:
 		self.market_tick_symbol = 'EUR_USD'
 		self.market_tick_freq = 1.5  # seconds
 		self._market_tick_last_price = 1.0845
+		# ATR trail display tracking (to avoid excessive logging)
+		self._last_atr_trail_values: Dict[str, float] = {}
 
 		self._announce()
 
@@ -90,18 +92,16 @@ class OandaTradingEngine:
 			logger.warning('Position police error: %s', e)
 	
 	def _check_market_hours(self):
-		"""Check if Forex market is currently open (for live mode)"""
+		"""Check if Forex market is currently open (for live mode only)"""
 		try:
 			from util.market_hours_manager import MarketHoursManager
 			manager = MarketHoursManager()
 			is_open = manager.is_forex_open()
 			return "active" if is_open else "off_hours"
 		except (ImportError, AttributeError) as e:
-			# If market hours manager not available
+			# If market hours manager not available, default to off_hours for safety in live mode
 			logger.debug(f"Market hours manager not available: {e}")
-			# For live mode, default to off_hours for safety
-			# For practice mode, this won't be called anyway
-			return "off_hours" if self.environment == 'live' else "active"
+			return "off_hours"
 	
 	def get_session_status(self):
 		"""Get current session status, activity flag, and active strategies"""
@@ -128,14 +128,21 @@ class OandaTradingEngine:
 				session_status, is_active, active_strategies = self.get_session_status()
 				self.display.info('Session', f'{session_status} | Active: {is_active} | Strategies: {active_strategies}')
 				
-				# Display ATR trailing updates for active positions
+				# Display ATR trailing updates for active positions (only when values change)
 				for trade in trades:
 					symbol = trade.get('instrument') or trade.get('symbol')
 					sl_order = trade.get('stopLossOrder') or {}
 					current_sl = sl_order.get('price')
 					if current_sl and symbol:
-						# This will show the current trailing stop level
-						self.display.info('ATR Trail', f'{symbol}: {current_sl}')
+						try:
+							current_sl_float = float(current_sl)
+							# Only display if value changed significantly (> 0.0001)
+							last_value = self._last_atr_trail_values.get(symbol)
+							if last_value is None or abs(current_sl_float - last_value) > 0.0001:
+								self.display.info('ATR Trail', f'{symbol}: {current_sl}')
+								self._last_atr_trail_values[symbol] = current_sl_float
+						except (ValueError, TypeError):
+							pass
 
 				# Police enforcement
 				self._run_police()
