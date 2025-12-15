@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-cd /home/ing/RICK/RICK_LIVE_CLEAN
+cd "$(dirname "$0")/.."
 echo "=== STATUS: STOPPING ENGINE ==="
 if pgrep -af "oanda_trading_engine.py" >/dev/null 2>&1; then
   echo "Found running engine"

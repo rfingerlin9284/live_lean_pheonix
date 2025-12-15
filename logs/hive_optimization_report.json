@@ -1,0 +1,136 @@
+{
+  "timestamp": "2025-12-04T19:09:55.675341",
+  "execution_time_sec": 0.0,
+  "configurations_tested": 10,
+  "top_3_parameters": [
+    {
+      "rank": 1,
+      "name": "swing_trader",
+      "score": 960.81,
+      "win_rate": 54.75,
+      "avg_rr": 2.67,
+      "total_pips": 2434.5,
+      "total_trades": 179,
+      "sharpe_ratio": 136.01,
+      "profit_factor": 3.23,
+      "max_drawdown_pips": 1093.5
+    },
+    {
+      "rank": 2,
+      "name": "conservative",
+      "score": 449.35,
+      "win_rate": 56.22,
+      "avg_rr": 1.78,
+      "total_pips": 1122.0,
+      "total_trades": 185,
+      "sharpe_ratio": 60.65,
+      "profit_factor": 2.28,
+      "max_drawdown_pips": 874.8
+    },
+    {
+      "rank": 3,
+      "name": "aggressive",
+      "score": 420.81,
+      "win_rate": 55.74,
+      "avg_rr": 2.67,
+      "total_pips": 1031.4,
+      "total_trades": 183,
+      "sharpe_ratio": 56.36,
+      "profit_factor": 3.36,
+      "max_drawdown_pips": 437.4
+    }
+  ],
+  "all_results": [
+    {
+      "name": "swing_trader",
+      "score": 960.81,
+      "win_rate": 54.75,
+      "total_pips": 2434.5
+    },
+    {
+      "name": "conservative",
+      "score": 449.35,
+      "win_rate": 56.22,
+      "total_pips": 1122.0
+    },
+    {
+      "name": "aggressive",
+      "score": 420.81,
+      "win_rate": 55.74,
+      "total_pips": 1031.4
+    },
+    {
+      "name": "hedge_master",
+      "score": 284.98,
+      "win_rate": 53.45,
+      "total_pips": 680.1
+    },
+    {
+      "name": "quant_edge",
+      "score": 188.25,
+      "win_rate": 52.91,
+      "total_pips": 436.0
+    },
+    {
+      "name": "wolfpack_alpha",
+      "score": 188.25,
+      "win_rate": 52.91,
+      "total_pips": 436.0
+    },
+    {
+      "name": "baseline",
+      "score": 184.04,
+      "win_rate": 52.63,
+      "total_pips": 424.8
+    },
+    {
+      "name": "fib_optimized",
+      "score": 184.04,
+      "win_rate": 52.63,
+      "total_pips": 424.8
+    },
+    {
+      "name": "fvg_focused",
+      "score": 175.61,
+      "win_rate": 52.07,
+      "total_pips": 402.4
+    },
+    {
+      "name": "scalper",
+      "score": 126.01,
+      "win_rate": 52.07,
+      "total_pips": 271.6
+    }
+  ],
+  "recommended_parameters": {
+    "name": "swing_trader",
+    "ema_fast": 21,
+    "ema_medium": 50,
+    "ema_slow": 200,
+    "rsi_period": 21,
+    "rsi_oversold": 30,
+    "rsi_overbought": 70,
+    "fib_golden_pocket_min": 0.618,
+    "fib_golden_pocket_max": 0.65,
+    "fib_deep_retracement": 0.786,
+    "fvg_lookback": 10,
+    "fvg_min_gap_pips": 3.0,
+    "hedge_loss_pips_trigger": 7.0,
+    "hedge_loss_time_trigger_sec": 600,
+    "hedge_sl_pips": 15.0,
+    "hedge_tp_pips": 45.0,
+    "quant_rr_min": 3.2,
+    "quant_win_rate_min": 0.45,
+    "wolfpack_min_consensus": 3,
+    "wolfpack_min_confidence": 0.55,
+    "macd_fast": 12,
+    "macd_slow": 26,
+    "macd_signal": 9,
+    "atr_sl_multiplier": 2.5,
+    "atr_tp_multiplier": 6.0,
+    "bb_period": 20,
+    "bb_std_dev": 2.0,
+    "stoch_k_period": 14,
+    "stoch_d_period": 3
+  }
+}

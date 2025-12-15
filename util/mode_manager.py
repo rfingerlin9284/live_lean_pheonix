@@ -24,9 +24,13 @@ def switch_mode(mode: str, pin: Optional[int] = None, brokers: Optional[List[str
     return {'ok': True, 'mode': mode}
 
 
-def get_connector_environment(connector: str) -> Dict[str, Any]:
-    # Return a minimal structure representing connector environment
-    return {'connector': connector, 'env': 'PAPER' if _CURRENT_MODE != 'LIVE' else 'LIVE'}
+def get_connector_environment(connector: str) -> str:
+    """Return connector environment string.
+
+    Connectors in this repo generally expect a string like 'live' or 'practice'.
+    This stub keeps tests/scripts happy without relying on external state.
+    """
+    return 'live' if _CURRENT_MODE == 'LIVE' else 'practice'
 
 
 def read_upgrade_toggle() -> bool:

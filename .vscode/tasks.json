@@ -2,59 +2,94 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "1. Start Brain/Hive/Agent (with narration)",
-      "type": "shell",
-      "command": "./start_with_integrity.sh",
-      "presentation": { "reveal": "always", "panel": "dedicated" },
-      "isBackground": true,
-      "problemMatcher": []
+        "label": "1. Start Brain/Hive/Agent (with narration)",
+        "type": "shell",
+        "command": "./start_with_integrity.sh",
+        "isBackground": true,
+        "options": {
+            "cwd": "${workspaceFolder}"
+        }
     },
     {
-      "label": "2. Start Sentinel+Watchdog (with fallback)",
-      "type": "shell",
-      "command": "python3 active_trade_monitor.py | tee /tmp/sentinel.log & python3 system_watchdog.py | tee /tmp/watchdog.log",
-      "presentation": { "reveal": "always", "panel": "dedicated" },
-      "isBackground": true,
-      "problemMatcher": []
+        "label": "2. Start Sentinel+Watchdog (with fallback)",
+        "type": "shell",
+        "command": "python3 active_trade_monitor.py | tee /tmp/sentinel.log & python3 system_watchdog.py | tee /tmp/watchdog.log",
+        "isBackground": true,
+        "options": {
+            "cwd": "${workspaceFolder}"
+        }
     },
     {
-      "label": "Check Narration (tools)",
-      "type": "shell",
-      "command": "python3 ${workspaceFolder}/tools/check_narration_counts.py",
-      "presentation": { "echo": true, "reveal": "always", "panel": "dedicated" },
-      "problemMatcher": []
+        "label": "Run OANDA Engine (Practice)",
+        "type": "shell",
+        "command": "bash -lc \"RICK_ENV=practice python3 -u ${workspaceFolder}/oanda/oanda_trading_engine.py\"",
+        "isBackground": true,
+        "options": {
+            "cwd": "${workspaceFolder}"
+        },
+        "problemMatcher": []
     },
     {
-      "label": "Run OANDA Engine (Practice)",
-      "type": "shell",
-      "command": "bash -lc \"RICK_ENV=practice python3 ${workspaceFolder}/oanda/oanda_trading_engine.py\"",
-      "isBackground": true,
-      "presentation": { "echo": true, "reveal": "always", "panel": "dedicated" },
-      "problemMatcher": []
+        "label": "Run OANDA Engine (Live)",
+        "type": "shell",
+        "command": "bash -lc \"RICK_ENV=live python3 -u ${workspaceFolder}/oanda/oanda_trading_engine.py\"",
+        "isBackground": true,
+        "options": {
+            "cwd": "${workspaceFolder}"
+        }
     },
     {
-      "label": "Run OANDA Engine (Live)",
-      "type": "shell",
-      "command": "bash -lc \"RICK_ENV=live python3 ${workspaceFolder}/oanda/oanda_trading_engine.py\"",
-      "isBackground": true,
-      "presentation": { "echo": true, "reveal": "always", "panel": "dedicated" },
-      "problemMatcher": []
+        "label": "Tail Narration (follow)",
+        "type": "shell",
+        "command": "bash -lc \"tail -n 200 -f ${workspaceFolder}/narration.jsonl\"",
+        "isBackground": true,
+        "options": {
+            "cwd": "${workspaceFolder}"
+        }
     },
     {
-      "label": "Run Charter Gate Tests",
-      "type": "shell",
-      "command": "bash -lc \"python3 -m pytest -q ${workspaceFolder}/tests/test_charter_gates.py || python3 ${workspaceFolder}/tests/test_charter_gates.py\"",
-      "presentation": { "echo": true, "reveal": "always", "panel": "shared" },
-      "group": "test",
-      "problemMatcher": []
+        "label": "Tail Narration (key events)",
+        "type": "shell",
+        "command": "bash -lc \"tail -n 0 -f ${workspaceFolder}/narration.jsonl | grep -E '(TRADE_OPENED|TRADE_CLOSED|ORDER_PLACED|OCO_PLACED|BROKER_ORDER_CREATED|BROKER_MAPPING|CONSENSUS|WOLFPACK)'\"",
+        "isBackground": true,
+        "options": {
+            "cwd": "${workspaceFolder}"
+        }
     },
     {
-      "label": "Tail Narration (follow)",
-      "type": "shell",
-      "command": "bash -lc \"tail -n 200 -f ${workspaceFolder}/narration.jsonl\"",
-      "isBackground": true,
-      "presentation": { "echo": true, "reveal": "always", "panel": "dedicated" },
-      "problemMatcher": []
+        "label": "Plain English Narration (live)",
+        "type": "shell",
+        "command": "bash -lc \"${workspaceFolder}/util/plain_english_narration.sh\"",
+        "isBackground": true,
+        "options": {
+            "cwd": "${workspaceFolder}"
+        }
+    },
+    {
+        "label": "Check Narration (tools)",
+        "type": "shell",
+        "command": "python3 ${workspaceFolder}/tools/check_narration_counts.py",
+        "options": {
+            "cwd": "${workspaceFolder}"
+        }
+    },
+    {
+        "label": "Run Charter Gate Tests",
+        "type": "shell",
+        "command": "bash -lc \"python3 -m pytest -q ${workspaceFolder}/tests/test_charter_gates.py || python3 ${workspaceFolder}/tests/test_charter_gates.py\"",
+        "group": "test",
+        "options": {
+            "cwd": "${workspaceFolder}"
+        }
+    },
+    {
+        "label": "Start Full System (tmux/foreground)",
+        "type": "shell",
+        "command": "bash -lc \"${workspaceFolder}/start_full_system.sh\"",
+        "isBackground": false,
+        "options": {
+            "cwd": "${workspaceFolder}"
+        }
     }
-  ]
+]
 }

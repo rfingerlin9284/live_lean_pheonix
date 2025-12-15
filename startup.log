@@ -1,0 +1,722 @@
+🔍 Running integrity checks...
+=== RICK PHOENIX SYSTEM DIAGNOSTIC ===
+Time: Sun Dec 14 23:24:30 UTC 2025
+
+[Strategy Configuration]
+Active Profile: aggressive
+
+[OANDA Sessions]
+  asia      : ✅ ACTIVE | Strategies: ['wolfpack_ema_trend', 'mean_reversion']
+  london    : ✅ ACTIVE | Strategies: ['wolfpack_ema_trend', 'fvg_breakout']
+  new_york  : ✅ ACTIVE | Strategies: ['wolfpack_ema_trend', 'quant_hedge']
+  off_hours : ✅ ACTIVE | Strategies: ['wolfpack_ema_trend']
+
+[Environment / Two-Step SL]
+  TWO_STEP_SL_MODE: ON
+  STEP2_TRIGGER_PIPS: 8
+
+[Charter Status]
+  ✅ RickCharter: Present
+  ✅ AgentCharter: Present
+
+[Components]
+  ✅ OANDA Connector: Installed
+
+=== DIAGNOSTIC COMPLETE ===
+✅ Integrity verified
+🚀 Starting OANDA Practice Engine...
+📊 Account: 101-001-31210531-002
+⚠️  ML modules not available - running in basic mode
+⚠️  Aggressive Money Machine not available: No module named 'risk'
+⚠️  Hive Mind not available - running without swarm coordination
+[92m✅ ✅ PRACTICE API connected[0m
+   Account: 101-001-31210531-002
+   Endpoint: https://api-fxpractice.oanda.com
+[92m✅ ✅ Momentum/Trailing system loaded[0m
+WARNING:root:Optional strategy import failed: No module named 'CONSOLIDATED_STRATEGIES'
+✅ Registry-based strategies loaded
+✅ Loaded 5 registry strategies
+[92m✅ ✅ Strategy Aggregator loaded (5 prototype strategies)[0m
+[92m✅ ✅ Quantitative Hedge Engine loaded[0m
+[92m✅ 🛡️  Margin & Correlation Guardian Gates ACTIVE[0m
+[93m⚠️  ⚠️  Could not sync positions from OANDA: 401[0m
+[H[2J[3J
+[95m[1m=== 🤖 RBOTzilla TRADING ENGINE (PRACTICE) ===[0m
+[94mCharter-Compliant OANDA | PIN: 841921 | 2025-12-14 23:24[0m
+
+
+[96m--- CHARTER COMPLIANCE STATUS ---[0m
+  • PIN Validated       : [92m841921 ✅[0m
+  • Charter Version     : [96mRBOTzilla UNI Phase 9[0m
+  • Immutable OCO       : [92mENFORCED (All orders)[0m
+  • Min R:R Ratio       : [92m3.2:1 (Charter Immutable)[0m
+  • Min Notional        : [92m$1,000 (Charter Immutable)[0m
+  • Max Daily Loss      : [92m5.0% (Charter Breaker)[0m
+  • Max Latency         : [92m300ms (Charter 2.1)[0m
+
+[96m--- ENVIRONMENT CONFIGURATION ---[0m
+  • Environment         : [93mPRACTICE[0m
+  • API Endpoint        : [96mhttps://api-fxpractice.oanda.com[0m
+  • Account ID          : [96m101-001-31210531-002[0m
+  • Market Data         : [92mReal-time OANDA API[0m
+  • Order Execution     : [93mOANDA PRACTICE API[0m
+
+[96m--- SYSTEM COMPONENTS ---[0m
+  • Narration Logging   : [92mACTIVE → narration.jsonl[0m
+  • ML Intelligence     : [90mDISABLED[0m
+  • Hive Mind           : [90mSTANDALONE[0m
+  • Momentum System     : [92mACTIVE (rbotzilla_golden_age)[0m
+  • Hive Trigger Confidence: [96m0.80 (CHARTER_MIN)[0m
+  • Strategy Families (preferred order): [96mmean_reversion, fvg, scalping, trend, other[0m
+
+[96m--- RISK PARAMETERS ---[0m
+  • Position Size       : [96m~1,000 units (dynamic per pair)[0m
+  • Stop Loss           : [96m10 pips[0m
+  • Take Profit         : [96m64 pips (3.2:1 R:R)[0m
+  • Max Positions       : [96m3 concurrent[0m
+
+[93m⚠️  ⚠️  Charter requires $15k min notional - positions sized accordingly[0m
+
+[96m--- OANDA CONNECTION ---[0m
+  📡 OANDA PRACTICE API: [92mREADY[0m
+
+[92m[SUCCESS] ✅ RBOTzilla Engine Ready - PRACTICE Environment[0m
+[90m────────────────────────────────────────────────────────────────────────────────[0m
+
+  • Step 2 Trailing     : [92mENABLED[0m
+[92m[SUCCESS] Starting trading engine with PRACTICE API...[0m
+[94m[INFO] 📊 Market Data: PRACTICE OANDA API (real-time)[0m
+[94m[INFO] 💰 Orders: PRACTICE OANDA API[0m
+
+[93m⚠️  ⚠️  Could not sync positions from OANDA: 401[0m
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for EUR_USD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [EUR_USD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_USD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for GBP_USD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_USD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [GBP_USD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_JPY/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for USD_JPY: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_JPY/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [USD_JPY]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_CHF/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for USD_CHF: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_CHF/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [USD_CHF]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for AUD_USD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [AUD_USD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_CAD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for USD_CAD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_CAD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [USD_CAD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/NZD_USD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for NZD_USD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/NZD_USD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [NZD_USD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_GBP/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for EUR_GBP: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_GBP/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [EUR_GBP]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_JPY/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for EUR_JPY: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_JPY/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [EUR_JPY]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_JPY/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for GBP_JPY: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_JPY/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [GBP_JPY]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_JPY/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for AUD_JPY: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_JPY/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [AUD_JPY]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/CHF_JPY/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for CHF_JPY: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/CHF_JPY/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [CHF_JPY]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_CHF/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for EUR_CHF: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_CHF/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [EUR_CHF]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_CHF/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for GBP_CHF: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_CHF/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [GBP_CHF]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_CHF/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for AUD_CHF: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_CHF/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [AUD_CHF]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/NZD_CHF/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for NZD_CHF: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/NZD_CHF/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [NZD_CHF]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_AUD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for EUR_AUD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_AUD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [EUR_AUD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_AUD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for GBP_AUD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_AUD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [GBP_AUD]: Insufficient data (0 closes, need 30)
+[93m⚠️  No valid signals across pairs - skipping cycle[0m
+[93m⚠️  ⚠️  Could not sync positions from OANDA: 401[0m
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for EUR_USD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [EUR_USD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_USD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for GBP_USD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_USD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [GBP_USD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_JPY/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for USD_JPY: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_JPY/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [USD_JPY]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_CHF/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for USD_CHF: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_CHF/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [USD_CHF]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for AUD_USD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [AUD_USD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_CAD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for USD_CAD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_CAD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [USD_CAD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/NZD_USD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for NZD_USD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/NZD_USD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [NZD_USD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_GBP/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for EUR_GBP: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_GBP/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [EUR_GBP]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_JPY/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for EUR_JPY: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_JPY/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [EUR_JPY]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_JPY/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for GBP_JPY: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_JPY/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [GBP_JPY]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_JPY/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for AUD_JPY: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_JPY/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [AUD_JPY]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/CHF_JPY/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for CHF_JPY: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/CHF_JPY/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [CHF_JPY]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_CHF/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for EUR_CHF: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_CHF/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [EUR_CHF]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_CHF/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for GBP_CHF: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_CHF/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [GBP_CHF]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_CHF/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for AUD_CHF: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_CHF/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [AUD_CHF]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/NZD_CHF/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for NZD_CHF: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/NZD_CHF/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [NZD_CHF]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_AUD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for EUR_AUD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_AUD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [EUR_AUD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_AUD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for GBP_AUD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_AUD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [GBP_AUD]: Insufficient data (0 closes, need 30)
+[93m⚠️  No valid signals across pairs - skipping cycle[0m
+[93m⚠️  ⚠️  Could not sync positions from OANDA: 401[0m
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for EUR_USD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [EUR_USD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_USD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for GBP_USD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_USD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [GBP_USD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_JPY/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for USD_JPY: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_JPY/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [USD_JPY]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_CHF/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for USD_CHF: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_CHF/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [USD_CHF]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for AUD_USD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [AUD_USD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_CAD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for USD_CAD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_CAD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [USD_CAD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/NZD_USD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for NZD_USD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/NZD_USD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [NZD_USD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_GBP/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for EUR_GBP: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_GBP/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [EUR_GBP]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_JPY/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for EUR_JPY: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_JPY/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [EUR_JPY]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_JPY/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for GBP_JPY: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_JPY/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [GBP_JPY]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_JPY/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for AUD_JPY: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_JPY/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [AUD_JPY]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/CHF_JPY/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for CHF_JPY: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/CHF_JPY/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [CHF_JPY]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_CHF/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for EUR_CHF: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_CHF/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [EUR_CHF]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_CHF/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for GBP_CHF: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_CHF/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [GBP_CHF]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_CHF/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for AUD_CHF: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_CHF/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [AUD_CHF]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/NZD_CHF/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for NZD_CHF: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/NZD_CHF/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [NZD_CHF]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_AUD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for EUR_AUD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_AUD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [EUR_AUD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_AUD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for GBP_AUD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_AUD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [GBP_AUD]: Insufficient data (0 closes, need 30)
+[93m⚠️  No valid signals across pairs - skipping cycle[0m
+  • 🚓 Position Police   : [93msweep starting...[0m
+[91m❌ ❌ Position Police error: name '_rbz_force_min_notional_position_police' is not defined[0m
+[93m⚠️  ⚠️  Could not sync positions from OANDA: 401[0m
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for EUR_USD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [EUR_USD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_USD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for GBP_USD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_USD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [GBP_USD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_JPY/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for USD_JPY: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_JPY/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [USD_JPY]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_CHF/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for USD_CHF: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_CHF/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [USD_CHF]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for AUD_USD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [AUD_USD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_CAD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for USD_CAD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_CAD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [USD_CAD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/NZD_USD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for NZD_USD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/NZD_USD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [NZD_USD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_GBP/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for EUR_GBP: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_GBP/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [EUR_GBP]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_JPY/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for EUR_JPY: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_JPY/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [EUR_JPY]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_JPY/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for GBP_JPY: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_JPY/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [GBP_JPY]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_JPY/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for AUD_JPY: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_JPY/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [AUD_JPY]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/CHF_JPY/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for CHF_JPY: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/CHF_JPY/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [CHF_JPY]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_CHF/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for EUR_CHF: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_CHF/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [EUR_CHF]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_CHF/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for GBP_CHF: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_CHF/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [GBP_CHF]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_CHF/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for AUD_CHF: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_CHF/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [AUD_CHF]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/NZD_CHF/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for NZD_CHF: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/NZD_CHF/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [NZD_CHF]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_AUD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for EUR_AUD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_AUD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [EUR_AUD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_AUD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for GBP_AUD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_AUD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [GBP_AUD]: Insufficient data (0 closes, need 30)
+[93m⚠️  No valid signals across pairs - skipping cycle[0m
+  • 🚓 Position Police   : [93msweep starting...[0m
+[91m❌ ❌ Position Police error: name '_rbz_force_min_notional_position_police' is not defined[0m
+[93m⚠️  ⚠️  Could not sync positions from OANDA: 401[0m
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for EUR_USD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [EUR_USD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_USD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for GBP_USD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_USD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [GBP_USD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_JPY/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for USD_JPY: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_JPY/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [USD_JPY]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_CHF/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for USD_CHF: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_CHF/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [USD_CHF]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for AUD_USD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [AUD_USD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_CAD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for USD_CAD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_CAD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [USD_CAD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/NZD_USD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for NZD_USD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/NZD_USD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [NZD_USD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_GBP/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for EUR_GBP: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_GBP/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [EUR_GBP]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_JPY/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for EUR_JPY: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_JPY/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [EUR_JPY]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_JPY/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for GBP_JPY: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_JPY/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [GBP_JPY]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_JPY/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for AUD_JPY: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_JPY/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [AUD_JPY]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/CHF_JPY/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for CHF_JPY: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/CHF_JPY/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [CHF_JPY]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_CHF/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for EUR_CHF: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_CHF/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [EUR_CHF]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_CHF/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for GBP_CHF: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_CHF/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [GBP_CHF]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_CHF/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for AUD_CHF: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_CHF/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [AUD_CHF]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/NZD_CHF/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for NZD_CHF: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/NZD_CHF/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [NZD_CHF]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_AUD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for EUR_AUD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_AUD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [EUR_AUD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_AUD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for GBP_AUD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_AUD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [GBP_AUD]: Insufficient data (0 closes, need 30)
+[93m⚠️  No valid signals across pairs - skipping cycle[0m
+  • 🚓 Position Police   : [93msweep starting...[0m
+[91m❌ ❌ Position Police error: name '_rbz_force_min_notional_position_police' is not defined[0m
+[93m⚠️  ⚠️  Could not sync positions from OANDA: 401[0m
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for EUR_USD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [EUR_USD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_USD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for GBP_USD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_USD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [GBP_USD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_JPY/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for USD_JPY: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_JPY/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [USD_JPY]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_CHF/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for USD_CHF: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_CHF/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [USD_CHF]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for AUD_USD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [AUD_USD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_CAD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for USD_CAD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_CAD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [USD_CAD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/NZD_USD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for NZD_USD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/NZD_USD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [NZD_USD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_GBP/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for EUR_GBP: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_GBP/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [EUR_GBP]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_JPY/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for EUR_JPY: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_JPY/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [EUR_JPY]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_JPY/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for GBP_JPY: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_JPY/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [GBP_JPY]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_JPY/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for AUD_JPY: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_JPY/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [AUD_JPY]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/CHF_JPY/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for CHF_JPY: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/CHF_JPY/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [CHF_JPY]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_CHF/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for EUR_CHF: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_CHF/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [EUR_CHF]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_CHF/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for GBP_CHF: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_CHF/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [GBP_CHF]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_CHF/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for AUD_CHF: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_CHF/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [AUD_CHF]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/NZD_CHF/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for NZD_CHF: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/NZD_CHF/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [NZD_CHF]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_AUD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for EUR_AUD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_AUD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [EUR_AUD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_AUD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for GBP_AUD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_AUD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [GBP_AUD]: Insufficient data (0 closes, need 30)
+[93m⚠️  No valid signals across pairs - skipping cycle[0m
+  • 🚓 Position Police   : [93msweep starting...[0m
+[91m❌ ❌ Position Police error: name '_rbz_force_min_notional_position_police' is not defined[0m
+[93m⚠️  ⚠️  Could not sync positions from OANDA: 401[0m
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for EUR_USD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [EUR_USD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_USD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for GBP_USD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_USD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [GBP_USD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_JPY/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for USD_JPY: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_JPY/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [USD_JPY]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_CHF/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for USD_CHF: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_CHF/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [USD_CHF]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for AUD_USD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [AUD_USD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_CAD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for USD_CAD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_CAD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [USD_CAD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/NZD_USD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for NZD_USD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/NZD_USD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [NZD_USD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_GBP/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for EUR_GBP: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_GBP/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [EUR_GBP]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_JPY/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for EUR_JPY: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_JPY/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [EUR_JPY]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_JPY/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for GBP_JPY: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_JPY/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [GBP_JPY]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_JPY/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for AUD_JPY: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_JPY/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [AUD_JPY]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/CHF_JPY/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for CHF_JPY: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/CHF_JPY/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [CHF_JPY]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_CHF/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for EUR_CHF: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_CHF/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [EUR_CHF]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_CHF/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for GBP_CHF: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_CHF/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [GBP_CHF]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_CHF/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for AUD_CHF: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_CHF/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [AUD_CHF]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/NZD_CHF/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for NZD_CHF: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/NZD_CHF/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [NZD_CHF]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_AUD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for EUR_AUD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_AUD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [EUR_AUD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_AUD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for GBP_AUD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_AUD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [GBP_AUD]: Insufficient data (0 closes, need 30)
+[93m⚠️  No valid signals across pairs - skipping cycle[0m
+  • 🚓 Position Police   : [93msweep starting...[0m
+[91m❌ ❌ Position Police error: name '_rbz_force_min_notional_position_police' is not defined[0m
+[93m⚠️  ⚠️  Could not sync positions from OANDA: 401[0m
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for EUR_USD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [EUR_USD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_USD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for GBP_USD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_USD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [GBP_USD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_JPY/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for USD_JPY: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_JPY/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [USD_JPY]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_CHF/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for USD_CHF: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_CHF/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [USD_CHF]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for AUD_USD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [AUD_USD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_CAD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for USD_CAD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_CAD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [USD_CAD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/NZD_USD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for NZD_USD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/NZD_USD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [NZD_USD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_GBP/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for EUR_GBP: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_GBP/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [EUR_GBP]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_JPY/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for EUR_JPY: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_JPY/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [EUR_JPY]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_JPY/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for GBP_JPY: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_JPY/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [GBP_JPY]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_JPY/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for AUD_JPY: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_JPY/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [AUD_JPY]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/CHF_JPY/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for CHF_JPY: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/CHF_JPY/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [CHF_JPY]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_CHF/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for EUR_CHF: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_CHF/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [EUR_CHF]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_CHF/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for GBP_CHF: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_CHF/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [GBP_CHF]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_CHF/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for AUD_CHF: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_CHF/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [AUD_CHF]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/NZD_CHF/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for NZD_CHF: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/NZD_CHF/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [NZD_CHF]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_AUD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for EUR_AUD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_AUD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [EUR_AUD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_AUD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for GBP_AUD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_AUD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [GBP_AUD]: Insufficient data (0 closes, need 30)
+[93m⚠️  No valid signals across pairs - skipping cycle[0m
+  • 🚓 Position Police   : [93msweep starting...[0m
+[91m❌ ❌ Position Police error: name '_rbz_force_min_notional_position_police' is not defined[0m
+[93m⚠️  ⚠️  Could not sync positions from OANDA: 401[0m
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for EUR_USD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [EUR_USD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_USD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for GBP_USD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_USD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [GBP_USD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_JPY/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for USD_JPY: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_JPY/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [USD_JPY]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_CHF/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for USD_CHF: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_CHF/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [USD_CHF]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for AUD_USD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [AUD_USD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_CAD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for USD_CAD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_CAD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [USD_CAD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/NZD_USD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for NZD_USD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/NZD_USD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [NZD_USD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_GBP/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for EUR_GBP: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_GBP/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [EUR_GBP]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_JPY/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for EUR_JPY: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_JPY/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [EUR_JPY]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_JPY/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for GBP_JPY: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_JPY/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [GBP_JPY]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_JPY/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for AUD_JPY: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_JPY/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [AUD_JPY]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/CHF_JPY/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for CHF_JPY: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/CHF_JPY/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [CHF_JPY]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_CHF/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for EUR_CHF: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_CHF/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [EUR_CHF]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_CHF/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for GBP_CHF: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_CHF/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [GBP_CHF]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_CHF/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for AUD_CHF: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_CHF/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [AUD_CHF]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/NZD_CHF/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for NZD_CHF: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/NZD_CHF/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [NZD_CHF]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_AUD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for EUR_AUD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_AUD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [EUR_AUD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_AUD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for GBP_AUD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_AUD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [GBP_AUD]: Insufficient data (0 closes, need 30)
+[93m⚠️  No valid signals across pairs - skipping cycle[0m
+  • 🚓 Position Police   : [93msweep starting...[0m
+[91m❌ ❌ Position Police error: name '_rbz_force_min_notional_position_police' is not defined[0m
+[93m⚠️  ⚠️  Could not sync positions from OANDA: 401[0m
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for EUR_USD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [EUR_USD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_USD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for GBP_USD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_USD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [GBP_USD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_JPY/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for USD_JPY: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_JPY/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [USD_JPY]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_CHF/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for USD_CHF: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_CHF/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [USD_CHF]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for AUD_USD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [AUD_USD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_CAD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for USD_CAD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_CAD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [USD_CAD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/NZD_USD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for NZD_USD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/NZD_USD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [NZD_USD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_GBP/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for EUR_GBP: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_GBP/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [EUR_GBP]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_JPY/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for EUR_JPY: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_JPY/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [EUR_JPY]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_JPY/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for GBP_JPY: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_JPY/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [GBP_JPY]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_JPY/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for AUD_JPY: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_JPY/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [AUD_JPY]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/CHF_JPY/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for CHF_JPY: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/CHF_JPY/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [CHF_JPY]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_CHF/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for EUR_CHF: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_CHF/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [EUR_CHF]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_CHF/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for GBP_CHF: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_CHF/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [GBP_CHF]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_CHF/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for AUD_CHF: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_CHF/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [AUD_CHF]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/NZD_CHF/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for NZD_CHF: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/NZD_CHF/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [NZD_CHF]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_AUD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for EUR_AUD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_AUD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [EUR_AUD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_AUD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for GBP_AUD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_AUD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [GBP_AUD]: Insufficient data (0 closes, need 30)
+[93m⚠️  No valid signals across pairs - skipping cycle[0m
+  • 🚓 Position Police   : [93msweep starting...[0m
+[91m❌ ❌ Position Police error: name '_rbz_force_min_notional_position_police' is not defined[0m
+[93m⚠️  ⚠️  Could not sync positions from OANDA: 401[0m
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for EUR_USD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_USD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [EUR_USD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_USD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for GBP_USD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_USD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [GBP_USD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_JPY/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for USD_JPY: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_JPY/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [USD_JPY]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_CHF/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for USD_CHF: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_CHF/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [USD_CHF]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for AUD_USD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_USD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [AUD_USD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_CAD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for USD_CAD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/USD_CAD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [USD_CAD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/NZD_USD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for NZD_USD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/NZD_USD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [NZD_USD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_GBP/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for EUR_GBP: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_GBP/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [EUR_GBP]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_JPY/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for EUR_JPY: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_JPY/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [EUR_JPY]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_JPY/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for GBP_JPY: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_JPY/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [GBP_JPY]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_JPY/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for AUD_JPY: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_JPY/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [AUD_JPY]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/CHF_JPY/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for CHF_JPY: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/CHF_JPY/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [CHF_JPY]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_CHF/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for EUR_CHF: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_CHF/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [EUR_CHF]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_CHF/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for GBP_CHF: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_CHF/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [GBP_CHF]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_CHF/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for AUD_CHF: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/AUD_CHF/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [AUD_CHF]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/NZD_CHF/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for NZD_CHF: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/NZD_CHF/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [NZD_CHF]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_AUD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for EUR_AUD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/EUR_AUD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [EUR_AUD]: Insufficient data (0 closes, need 30)
+ERROR:brokers.oanda_connector:_safe_request_get failed: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_AUD/candles?count=120&granularity=M15&price=M
+ERROR:brokers.oanda_connector:OANDA candles error for GBP_AUD: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/instruments/GBP_AUD/candles?count=120&granularity=M15&price=M
+WARNING:momentum_signals:⚠️ [GBP_AUD]: Insufficient data (0 closes, need 30)
+[93m⚠️  No valid signals across pairs - skipping cycle[0m

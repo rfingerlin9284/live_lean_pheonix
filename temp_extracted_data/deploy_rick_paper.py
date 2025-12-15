@@ -1,1 +1,0 @@
-# Placeholder for extracted content from deploy_rick_paper.py

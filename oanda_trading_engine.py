@@ -1,63 +1,409 @@
 #!/usr/bin/env python3
-"""
-OANDA Trading Engine - RBOTzilla Charter Compliant
-Environment-Agnostic: practice/live determined ONLY by API endpoint & token
-- Unified codebase for all environments
-- Real-time OANDA API for market data and execution
-- Full RICK Hive Mind + ML Intelligence + Immutable Risk Management
-- Momentum-based TP cancellation with adaptive trailing stops
-PIN: 841921 | Generated: 2025-10-15
+"""RICK PHOENIX - OANDA Trading Engine (Single Canonical Engine)
+
+This is the ONLY supported engine entrypoint.
+
+Key behaviors:
+- Uses momentum signals from `core/momentum_signals.py`
+- Uses the canonical OANDA connector: `brokers/oanda_connector.py`
+- Two-step stop method (break-even -> tight trail)
+- Optional TP (disabled by default)
+- Optional incremental scale-out (partial closes)
+
+PIN: 841921
 """
 
-import sys
-from pathlib import Path
+# NOTE:
+# This file is kept only for backwards-compatibility with old launch scripts.
+# The ONLY canonical engine implementation lives in `oanda/oanda_trading_engine.py`.
+
+import os as _os
+import runpy as _runpy
+import sys as _sys
+
+_REPO_ROOT = _os.path.abspath(_os.path.dirname(__file__))
+_sys.path.insert(0, _REPO_ROOT)
+
+# If executed directly, delegate to canonical engine.
+if __name__ == '__main__':
+    _runpy.run_path(_os.path.join(_REPO_ROOT, 'oanda', 'oanda_trading_engine.py'), run_name='__main__')
+    raise SystemExit(0)
+
+# If imported, expose the canonical engine class.
+from oanda.oanda_trading_engine import OandaTradingEngine  # noqa: F401,E402
+
+# ---------------------------------------------------------------------------
+# Legacy engine source (archived; intentionally not executed)
+# ---------------------------------------------------------------------------
+_LEGACY_ENGINE_SOURCE = r'''
 import os
-import time
+import sys
 import asyncio
-import requests
-from datetime import datetime, timezone
-from typing import Dict, List, Optional, Tuple
+import logging
+import json
+from pathlib import Path
+from typing import Dict, Optional
 
-sys.path.insert(0, str(Path(__file__).parent.resolve()))
+# Ensure repo root in sys.path
+sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
-# Load environment variables manually
-env_file = str(Path(__file__).parent / 'master.env')
-if os.path.exists(env_file):
-    with open(env_file) as f:
-        for line in f:
-            line = line.strip()
-            if line and not line.startswith('#') and '=' in line:
-                key, value = line.split('=', 1)
-                os.environ[key.strip()] = value.strip()
-
-# Charter compliance imports
 from foundation.rick_charter import RickCharter
-from foundation.margin_correlation_gate import MarginCorrelationGate, Position, Order, HookResult
+from foundation.agent_charter import AgentCharter
 from brokers.oanda_connector import OandaConnector
-from util.terminal_display import TerminalDisplay, Colors
-from util.narration_logger import log_narration, log_pnl
-from util.rick_narrator import RickNarrator
-from util.usd_converter import get_usd_notional
-from systems.momentum_signals import generate_signal
+from util.terminal_display import TerminalDisplay
+from util.narration_logger import log_narration
+from util.position_police import _rbz_force_min_notional_position_police
+from util.alert_notifier import send_system_alert
 
-# ML Intelligence imports
-try:
-    from logic.regime_detector import StochasticRegimeDetector as RegimeDetector
-    ML_AVAILABLE = True
-except ImportError:
+from core.momentum_signals import generate_signal
+
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger('oanda_engine')
+
+
+class OandaTradingEngine:
+    def __init__(self, environment: Optional[str] = None):
+        AgentCharter.enforce()
+        if not getattr(RickCharter, 'PIN', None) == 841921:
+            raise PermissionError('Invalid Charter PIN')
+
+        self.display = TerminalDisplay()
+        if environment is None:
+            environment = os.getenv('RICK_ENV') or os.getenv('TRADING_ENVIRONMENT') or 'practice'
+        self.environment = environment
+
+        # Canonical connector (practice token is hardcoded in the connector in this repo snapshot)
+        self.oanda = OandaConnector(pin=841921, environment=environment)
+
+        self.toggle_paths = [
+            Path(os.getenv('PHX_TOGGLES_PATH') or os.getenv('TOGGLES_PATH') or 'PHOENIX_CLEAN_CUT/config/toggles.json'),
+            Path('config/toggles.json'),
+        ]
+        self.default_toggles = {
+            "no_simulation_mode": True,
+            "tight_trailing": True,
+            "two_step_sl": True,
+            "tp_for_scalps": False,
+            "tp_for_swings": False,
+            "be_trigger_pips": 6,
+            "trail_trigger_pips": 12,
+            "trail_distance_pips": 6,
+            "tight_trail_distance_pips": 3,
+            "alert_on_auth": True,
+            "scale_out_enabled": True,
+            "scale_out_levels": [
+                {"pips": 8, "fraction": 0.33},
+                {"pips": 16, "fraction": 0.33},
+            ],
+        }
+        self.toggles = self._load_toggles()
+        self._auth_reported_ok = False
+        self._auth_reported_fail = False
+
+        # Engine constants
+        self.MIN_CONFIDENCE = 0.55
+        self.MAX_POSITIONS = 12
+        self.STOP_LOSS_PIPS = 10
+        self.TAKE_PROFIT_PIPS = 32
+        self.TRAILING_START_PIPS = 3
+        self.TRAILING_DIST_PIPS = 5
+        self.TRADING_PAIRS = ['EUR_USD', 'GBP_USD', 'USD_JPY', 'AUD_USD', 'USD_CAD']
+
+        self.running = False
+        self.active_positions: Dict[str, dict] = {}
+        self._scale_out_done: Dict[str, set] = {}
+
+        self._announce()
+        self._check_auth_guard()
+
+    def _load_toggles(self) -> Dict:
+        for path in self.toggle_paths:
+            try:
+                if path.is_file():
+                    return {**self.default_toggles, **json.loads(path.read_text())}
+            except Exception as e:
+                logger.warning(f"Failed to load toggles from {path}: {e}")
+        return self.default_toggles.copy()
+
+    def _check_auth_guard(self):
+        ok, msg = self.oanda.check_authorization()
+        if ok:
+            if self.toggles.get("alert_on_auth", True) and not self._auth_reported_ok:
+                try:
+                    send_system_alert("OANDA connected ✅", msg)
+                except Exception:
+                    logger.debug('Auth success alert failed', exc_info=True)
+            self._auth_reported_ok = True
+            self._auth_reported_fail = False
+            return
+
+        if not self._auth_reported_fail and self.toggles.get("alert_on_auth", True):
+            try:
+                send_system_alert("❌ Unauthorized 401 — check OANDA token", msg, level="ERROR")
+            except Exception:
+                logger.debug('Auth failure alert failed', exc_info=True)
+        self._auth_reported_fail = True
+        if self.toggles.get("no_simulation_mode", True):
+            raise SystemExit("Auth failed — refusing to run (no_simulation_mode=true).")
+
+    def _announce(self):
+        self.display.clear_screen()
+        self.display.header('RBOTZILLA Consolidated', f'Env: {self.environment} | PIN: {getattr(RickCharter, "PIN", "N/A")}')
+        try:
+            log_narration(
+                event_type="PROFILE_STATUS",
+                details={
+                    "description": "Balanced profile applied",
+                    "min_expected_pnl_usd": getattr(RickCharter, 'MIN_EXPECTED_PNL_USD', None),
+                    "min_notional_usd": getattr(RickCharter, 'MIN_NOTIONAL_USD', None),
+                    "max_margin_utilization_pct": getattr(RickCharter, 'MAX_MARGIN_UTILIZATION_PCT', None),
+                },
+                symbol='SYSTEM',
+                venue='oanda',
+            )
+        except Exception:
+            pass
+
+    def _run_police(self):
+        try:
+            _rbz_force_min_notional_position_police(
+                account_id=self.oanda.account_id,
+                token=self.oanda.api_token,
+                api_base=self.oanda.api_base,
+            )
+        except Exception as e:
+            logger.warning('Position police error: %s', e)
+
+    async def run(self):
+        self.running = True
+        while self.running:
+            try:
+                self.toggles = self._load_toggles()
+                self._check_auth_guard()
+
+                trades = self.oanda.get_trades() or []
+                self.active_positions = {t['id']: t for t in trades if 'id' in t}
+                self.display.info('Active Positions', str(len(self.active_positions)))
+
+                self._run_police()
+
+                if len(self.active_positions) < self.MAX_POSITIONS:
+                    for symbol in self.TRADING_PAIRS:
+                        if any((t.get('instrument') or t.get('symbol')) == symbol for t in trades):
+                            continue
+                        candles = self.oanda.get_historical_data(symbol, count=100, granularity='M15')
+                        result = generate_signal(symbol, candles)
+                        if isinstance(result, tuple):
+                            sig = result[0]
+                            conf = result[1] if len(result) > 1 else 0.0
+                        else:
+                            sig, conf = result, 0.0
+                        if sig and conf >= self.MIN_CONFIDENCE:
+                            await self._open_trade(symbol, sig, conf)
+                            await asyncio.sleep(1)
+
+                for trade in trades:
+                    await self._manage_trade(trade)
+
+                await asyncio.sleep(30)
+            except Exception as e:
+                logger.error('Engine main loop error: %s', e)
+                await asyncio.sleep(5)
+
+    async def _open_trade(self, symbol: str, direction: str, confidence: float):
+        prices = self.oanda.get_live_prices([symbol])
+        if not prices or symbol not in prices:
+            return
+        snap = prices[symbol]
+        bid = snap.get('bid')
+        ask = snap.get('ask')
+        entry = ask if direction == 'BUY' else bid
+        if entry is None:
+            return
+        try:
+            entry = float(entry)
+        except Exception:
+            return
+
+        pip = 0.01 if 'JPY' in symbol else 0.0001
+        sl = entry - (self.STOP_LOSS_PIPS * pip) if direction == 'BUY' else entry + (self.STOP_LOSS_PIPS * pip)
+
+        strategy_name = os.getenv('ENGINE_STRATEGY', 'momentum')
+        is_scalp = strategy_name in {"wolfpack_ema_trend", "fvg_breakout", "scalp"}
+        use_tp = self.toggles.get('tp_for_swings', False) if not is_scalp else self.toggles.get('tp_for_scalps', False)
+        tp = None
+        if use_tp:
+            tp = entry + (self.TAKE_PROFIT_PIPS * pip) if direction == 'BUY' else entry - (self.TAKE_PROFIT_PIPS * pip)
+
+        min_notional = getattr(RickCharter, 'MIN_NOTIONAL_USD', 15000)
+        if symbol.startswith('USD'):
+            units = int(min_notional * 1.05)
+        else:
+            units = int((min_notional * 1.05) / max(entry, 1e-9))
+        units = ((units // 100) + 1) * 100
+        units = units if direction == 'BUY' else -units
+
+        base_ccy, quote_ccy = (symbol.split('_', 1) + [''])[:2]
+        if quote_ccy == 'USD':
+            risk_usd = abs(entry - sl) * abs(units)
+            reward_usd = abs(tp - entry) * abs(units) if tp is not None else 0.0
+            notional_usd = abs(units) * entry
+        elif base_ccy == 'USD':
+            risk_usd = (abs(entry - sl) * abs(units)) / max(entry, 1e-9)
+            reward_usd = ((abs(tp - entry) * abs(units)) / max(entry, 1e-9)) if tp is not None else 0.0
+            notional_usd = abs(units)
+        else:
+            risk_usd = 0.0
+            reward_usd = 0.0
+            notional_usd = None
+
+        tp_text = f"TP: {tp:.5f} (+${reward_usd:.2f})" if tp is not None else "TP: -- (disabled)"
+        self.display.info('Placing', f"{symbol} {direction} | SL: {sl:.5f} (-${risk_usd:.2f}) | {tp_text}")
+        try:
+            log_narration(event_type='TRADE_SIGNAL', details={'symbol': symbol, 'direction': direction, 'confidence': confidence})
+        except Exception:
+            pass
+
+        result = self.oanda.place_oco_order(symbol, entry, sl, tp, units)
+        if result.get('success'):
+            order_id = result.get('order_id')
+            self.display.alert(f"✅ Order placed! Order ID: {order_id}", 'SUCCESS')
+            target_text = f"{tp:.5f}" if tp is not None else "--"
+            notional_text = f"${notional_usd:,.0f}" if isinstance(notional_usd, (int, float)) else "--"
+            self.display.trade_open(
+                symbol,
+                direction,
+                entry,
+                f"Stop: {sl:.5f} | Target: {target_text} | Size: {abs(units):,} units | Notional: {notional_text}",
+            )
+            try:
+                log_narration(
+                    event_type='TRADE_OPENED',
+                    details={
+                        'symbol': symbol,
+                        'entry_price': entry,
+                        'stop_loss': sl,
+                        'take_profit': tp,
+                        'stop_loss_usd': round(risk_usd, 2),
+                        'take_profit_usd': round(reward_usd, 2),
+                        'notional_usd': round(notional_usd, 2) if isinstance(notional_usd, (int, float)) else None,
+                    },
+                )
+            except Exception:
+                pass
+        else:
+            self.display.error('Order failed: ' + str(result.get('error')))
+
+    async def _manage_trade(self, trade):
+        try:
+            is_long = float(trade.get('currentUnits', trade.get('units', 0))) > 0
+            trade_id = str(trade.get('id') or '')
+            entry = float(trade.get('price') or trade.get('entryPrice') or 0)
+
+            sl_order = trade.get('stopLossOrder') or {}
+            price_val = sl_order.get('price') if sl_order else None
+            current_sl = float(price_val) if price_val is not None else None
+
+            symbol = trade.get('instrument') or trade.get('symbol')
+            if not symbol:
+                return
+
+            prices = self.oanda.get_live_prices([symbol])
+            if not prices or symbol not in prices:
+                return
+            snap = prices[symbol]
+            curr = snap.get('bid') if is_long else snap.get('ask')
+            if curr is None:
+                return
+            curr = float(curr)
+
+            pip = 0.01 if 'JPY' in symbol else 0.0001
+            profit_pips = (curr - entry) / pip if is_long else (entry - curr) / pip
+
+            # Optional scale-out (incremental partial closes)
+            try:
+                if self.toggles.get('scale_out_enabled', True) and trade_id:
+                    done = self._scale_out_done.setdefault(trade_id, set())
+                    levels = self.toggles.get('scale_out_levels') or []
+                    sane_levels = []
+                    for i, lvl in enumerate(levels):
+                        if not isinstance(lvl, dict):
+                            continue
+                        p = lvl.get('pips')
+                        f = lvl.get('fraction')
+                        if p is None or f is None:
+                            continue
+                        try:
+                            p = float(p)
+                            f = float(f)
+                        except Exception:
+                            continue
+                        if p > 0 and 0 < f < 1:
+                            sane_levels.append((i, p, f))
+
+                    if sane_levels:
+                        abs_units = int(abs(float(trade.get('currentUnits', trade.get('units', 0)))))
+                        for idx, pips_trigger, fraction in sane_levels:
+                            if idx in done:
+                                continue
+                            if profit_pips >= pips_trigger and abs_units >= 2:
+                                close_units = int(abs_units * fraction)
+                                close_units = max(1, (close_units // 100) * 100)
+                                if close_units >= abs_units:
+                                    continue
+                                resp = self.oanda.close_trade(trade_id, close_units)
+                                if resp and resp.get('success'):
+                                    done.add(idx)
+                                    self.display.info('Scale-out', f"{symbol}: closed {close_units} units at +{profit_pips:.1f} pips")
+            except Exception:
+                pass
+
+            be_trigger = self.toggles.get('be_trigger_pips', self.TRAILING_START_PIPS)
+            trail_trigger = self.toggles.get('trail_trigger_pips', self.TRAILING_START_PIPS)
+            trail_distance = self.toggles.get('tight_trail_distance_pips', self.TRAILING_DIST_PIPS) if self.toggles.get('tight_trailing', True) else self.toggles.get('trail_distance_pips', self.TRAILING_DIST_PIPS)
+
+            # Step 1: move to break-even
+            if self.toggles.get('two_step_sl', True) and profit_pips >= be_trigger:
+                be_sl = entry
+                if current_sl is None or (is_long and be_sl > current_sl) or (not is_long and be_sl < current_sl):
+                    self.display.info('SL to BE', f"{symbol}: {current_sl if current_sl is not None else 0:.5f} -> {be_sl:.5f}")
+                    self.oanda.set_trade_stop(trade.get('id'), be_sl)
+                    current_sl = be_sl
+
+            # Step 2: tight trailing once trigger reached
+            if profit_pips >= trail_trigger:
+                new_sl = curr - (trail_distance * pip) if is_long else curr + (trail_distance * pip)
+                if current_sl is None or (is_long and new_sl > current_sl) or (not is_long and new_sl < current_sl):
+                    self.display.info('Trailing', f"{symbol}: {current_sl if current_sl is not None else 0:.5f} -> {new_sl:.5f}")
+                    self.oanda.set_trade_stop(trade.get('id'), new_sl)
+        except Exception:
+            pass
+
+
+def _autostop_previous_instances():
     try:
-        from ml_learning.regime_detector import RegimeDetector
-        ML_AVAILABLE = True
-    except ImportError:
-        ML_AVAILABLE = False
-        print("⚠️  ML modules not available - running in basic mode")
+        import subprocess
+        import time
 
-# Hive Mind imports
-try:
-    from hive.rick_hive_mind import RickHiveMind, SignalStrength
-    HIVE_AVAILABLE = True
-except ImportError:
-    HIVE_AVAILABLE = False
+        result = subprocess.run(['pgrep', '-f', 'oanda_trading_engine.py'], capture_output=True, text=True)
+        existing_pids = [pid for pid in result.stdout.strip().split('\n') if pid and pid != str(os.getpid())]
+        if existing_pids:
+            print(f"🔄 Stopping {len(existing_pids)} existing OANDA engine(s)...")
+            subprocess.run(['pkill', '-f', 'python3.*oanda_trading_engine.py'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            time.sleep(2)
+            print("✅ Ready to start")
+    except Exception as e:
+        logger.warning(f"Could not check for existing instances: {e}")
+
+
+if __name__ == '__main__':
+    _autostop_previous_instances()
+    engine = OandaTradingEngine(environment=os.getenv('RICK_ENV', 'practice'))
+    try:
+        asyncio.run(engine.run())
+    except KeyboardInterrupt:
+        print('\nStopped')
 
 # Aggressive Money Machine - Dynamic Sizing imports
 try:
@@ -180,6 +526,21 @@ class OandaTradingEngine:
                 eg._risk_manager = self.risk_manager
         except Exception:
             pass
+
+        # ------------------------------------------------------------------
+        # STRATEGY ADVISOR: family-aware preference + performance tracking
+        # ------------------------------------------------------------------
+        try:
+            from util.strategy_advisor import StrategyAdvisor
+            raw_fams = os.getenv('RBZ_PREF_STRATEGY_FAMILIES', '')
+            if raw_fams:
+                fams = [f.strip().lower() for f in raw_fams.split(',') if f.strip()]
+            else:
+                fams = None
+            self.strategy_advisor = StrategyAdvisor(preferred_families=fams)
+        except Exception as e:
+            self.strategy_advisor = None
+            self.display.warning(f"⚠️  StrategyAdvisor not available: {e}")
         
         # ========================================================================
         # MARGIN & CORRELATION GUARDIAN GATES (NEW)
@@ -260,8 +621,10 @@ class OandaTradingEngine:
             self.min_notional_usd = self.charter.MIN_NOTIONAL_USD  # $15,000 minimum (Charter immutable)
             self.position_size = 14000  # Base size (adjusted per pair to meet minimums)
         
-        self.stop_loss_pips = 20
-        self.take_profit_pips = 64  # 3.2:1 R:R ratio (Charter minimum)
+        # Use STEP 1 surgeon stop as the charter risk distance
+        self.initial_stop_pips = 10  # Defined from Friday defaults
+        self.stop_loss_pips = self.initial_stop_pips   # 10 pips initial hard SL
+        self.take_profit_pips = 64                     # keeps R:R well above 3.2:1
         self.min_rr_ratio = self.charter.MIN_RISK_REWARD_RATIO  # 3.2
         self.max_daily_loss = abs(self.charter.DAILY_LOSS_BREAKER_PCT)  # 5%
         
@@ -306,6 +669,28 @@ class OandaTradingEngine:
         )
         
         self._display_startup()
+
+        # Two-step "surgeon" stop-loss parameters
+        # STEP 1: small hard stop, then move SL to BE+lock once trade reaches 1R
+        # STEP 2: after 2R or strong Hive/Momentum, cancel TP and convert to trailing SL
+        self.initial_stop_pips = 10.0          # initial hard SL distance in pips
+        self.step1_rr_trigger = 1.0            # at 1R -> move SL to BE+lock
+        self.step1_lock_in_pips = 2.0          # lock in 2 pips on STEP 1
+        self.step2_rr_trigger = 2.0            # at 2R or strong consensus -> cancel TP & trail
+        self.min_trailing_lock_pips = 4.0      # min locked profit when trailing
+
+        # Toggle: enable/disable STEP 2 (TP cancel + trailing SL)
+        # RBZ_ENABLE_STEP2_TRAILING = "1" → ON (default)
+        # RBZ_ENABLE_STEP2_TRAILING = "0" → OFF (keep single SL/TP after STEP 1)
+        self.enable_step2_trailing = os.getenv("RBZ_ENABLE_STEP2_TRAILING", "1") == "1"
+
+        # Display toggle status at startup
+        if hasattr(self, 'display') and hasattr(self.display, 'info'):
+            self.display.info(
+                "Step 2 Trailing",
+                "ENABLED" if self.enable_step2_trailing else "DISABLED",
+                Colors.BRIGHT_GREEN if self.enable_step2_trailing else Colors.BRIGHT_BLACK
+            )
     
     def _display_startup(self):
         """Display startup screen with Charter compliance info"""
@@ -344,6 +729,12 @@ class OandaTradingEngine:
                          Colors.BRIGHT_GREEN if MOMENTUM_SYSTEM_AVAILABLE else Colors.BRIGHT_BLACK)
         hive_src = "CHARTER_MIN" if getattr(self, 'hive_trigger_enforced_by_charter', False) else "ENV_OVERRIDE"
         self.display.info("Hive Trigger Confidence", f"{self.hive_trigger_confidence:.2f} ({hive_src})", Colors.BRIGHT_CYAN)
+
+        # Show preferred strategy families if advisor is available
+        preferred_fams = getattr(self, 'strategy_advisor', None)
+        if preferred_fams:
+            fam_order = ", ".join(self.strategy_advisor.get_preferred_families())
+            self.display.info("Strategy Families (preferred order)", fam_order, Colors.BRIGHT_CYAN)
         
         self.display.section("RISK PARAMETERS")
         self.display.info("Position Size", f"~{self.position_size:,} units (dynamic per pair)", Colors.BRIGHT_CYAN)
@@ -783,19 +1174,20 @@ class OandaTradingEngine:
         return position_size
     
     def calculate_stop_take_levels(self, symbol: str, direction: str, entry_price: float):
-        """Calculate stop loss and take profit levels"""
-        pip_size = 0.0001  # Standard for most pairs
-        if 'JPY' in symbol:
-            pip_size = 0.01
-        
+        """Calculate stop loss and take profit levels (Charter-compliant, symbol-aware precision)."""
+        # Pip size
+        pip_size = 0.01 if 'JPY' in symbol else 0.0001
+        # Price precision: JPY pairs usually 3 decimals, others 5
+        decimals = 3 if 'JPY' in symbol else 5
+
         if direction == "BUY":
             stop_loss = entry_price - (self.stop_loss_pips * pip_size)
             take_profit = entry_price + (self.take_profit_pips * pip_size)
         else:  # SELL
             stop_loss = entry_price + (self.stop_loss_pips * pip_size)
             take_profit = entry_price - (self.take_profit_pips * pip_size)
-        
-        return round(stop_loss, 5), round(take_profit, 5)
+
+        return round(stop_loss, decimals), round(take_profit, decimals)
     
     def _evaluate_hedge_conditions(self, symbol: str, direction: str, units: float, 
                                    entry_price: float, notional: float, current_margin_used: float) -> Dict:
@@ -876,7 +1268,7 @@ class OandaTradingEngine:
             'reason': f'Low risk profile (margin: {margin_utilization:.1%}, notional: ${notional:,.0f})'
         }
     
-    def place_trade(self, symbol: str, direction: str):
+    def place_trade(self, symbol: str, direction: str, strategy_meta: Optional[Dict] = None):
         """Place Charter-compliant OCO order with full logging (environment-agnostic)"""
         try:
             # Get current price
@@ -1080,7 +1472,13 @@ class OandaTradingEngine:
                     f"Stop: {stop_loss:.5f} | Target: {take_profit:.5f} | Size: {abs(units):,} units | Notional: ${notional_value:,.0f}"
                 )
                 
-                # Track position
+                # Strategy meta may be passed in from the signal layer (family, name)
+                strategy_family = None
+                strategy_name = None
+                if isinstance(strategy_meta, dict):
+                    strategy_family = strategy_meta.get('family')
+                    strategy_name = strategy_meta.get('strategy_name') or strategy_meta.get('name')
+
                 self.active_positions[order_id] = {
                     'symbol': symbol,
                     'direction': direction,
@@ -1090,7 +1488,15 @@ class OandaTradingEngine:
                     'units': units,
                     'notional': notional_value,
                     'rr_ratio': rr_ratio,
-                    'timestamp': datetime.now(timezone.utc)
+                    'timestamp': datetime.now(timezone.utc),
+                    # Strategy meta
+                    'strategy_family': strategy_family,
+                    'strategy_name': strategy_name,
+                    # Two-step surgeon SL stage:
+                    # 0 = fresh OCO with hard SL
+                    # 1 = SL moved to BE+lock, TP still active
+                    # 2 = TP cancelled, trailing SL active
+                    'two_step_stage': 0,
                 }
                 
                 # ========================================================================
@@ -1251,19 +1657,19 @@ class OandaTradingEngine:
         return
 
     async def trade_manager_loop(self):
-        """Background loop that evaluates active positions and asks the Hive for momentum signals.
+        """Background loop that evaluates active positions and runs two-step surgeon SL logic.
 
         Behavior:
-        - For positions older than `min_position_age_seconds`, query the Hive Mind for a consensus
-          analysis on that symbol.
-        - Use battle-tested MomentumDetector (from rbotzilla_golden_age.py) to detect strong momentum.
-        - If EITHER the Hive consensus exceeds threshold OR MomentumDetector confirms momentum,
-          cancel the existing TakeProfit order and set an adaptive trailing stop via the OANDA connector.
-        - All modifications are logged via `log_narration` to keep an auditable trail.
-        
-        Integration Note: This TradeManager integrates existing momentum detection logic from
-        /home/ing/RICK/RICK_LIVE_CLEAN/rbotzilla_golden_age.py (MomentumDetector & SmartTrailingSystem)
-        to fulfill Charter requirement for code reuse (PIN 841921).
+        - STEP 1: When a position reaches step1_rr_trigger (e.g. 1R), move SL to BE+small lock,
+                  KEEP TP in place. This is the "surgeon" upgrade from pure risk to locked risk.
+        - STEP 2: When either:
+             * RR >= step2_rr_trigger (e.g. 2R), or
+             * Hive consensus is strong in the trade direction, or
+             * MomentumDetector confirms strong momentum,
+          then:
+             * cancel the TP leg of the OCO, and
+             * set an adaptive trailing SL using SmartTrailingSystem.
+        - All changes are logged with log_narration for full auditability.
         """
         while self.is_running:
             try:
@@ -1279,12 +1685,14 @@ class OandaTradingEngine:
                                 pass
                 except Exception:
                     pass
+
                 now = datetime.now(timezone.utc)
                 for order_id, pos in list(self.active_positions.items()):
-                    # Skip if already processed for TP cancellation
+                    # If we already converted to trailing and TP is gone, we can skip
+                    # further TP work here. (Trailing itself is handled by the initial jump.)
                     if pos.get('tp_cancelled'):
                         continue
-                    
+
                     # Age check
                     age = (now - pos['timestamp']).total_seconds()
                     if age < self.min_position_age_seconds:
@@ -1299,7 +1707,10 @@ class OandaTradingEngine:
                         current_price_data = self.get_current_price(symbol)
                         if not current_price_data:
                             continue
-                        current_price = current_price_data['ask'] if direction == 'BUY' else current_price_data['bid']
+                        current_price = (
+                            current_price_data['ask'] if direction == 'BUY'
+                            else current_price_data['bid']
+                        )
                     except Exception as e:
                         self.display.warning(f"Could not fetch current price for {symbol}: {e}")
                         continue
@@ -1310,90 +1721,240 @@ class OandaTradingEngine:
                         profit_pips = (current_price - entry_price) / pip_size
                     else:
                         profit_pips = (entry_price - current_price) / pip_size
-                    
+
                     # Estimate ATR (use stop_loss_pips / 1.2 as proxy, since stop = 1.2 * ATR)
                     estimated_atr_pips = self.stop_loss_pips / 1.2
-                    profit_atr_multiple = profit_pips / estimated_atr_pips if estimated_atr_pips > 0 else 0
+                    profit_atr_multiple = (
+                        profit_pips / estimated_atr_pips if estimated_atr_pips > 0 else 0
+                    )
 
-                    # Signal flags
+                    # Two-step surgeon SL tracking
+                    stage = pos.get('two_step_stage', 0)
+                    pos['two_step_stage'] = stage  # normalize
+                    risk_pips = float(self.stop_loss_pips) if self.stop_loss_pips > 0 else 1.0
+                    rr_achieved = profit_pips / risk_pips
+
+                    # ──────────────────────────────────────────────────────────────
+                    # STEP 1: move SL to BE + small lock once trade reaches 1R
+                    # ──────────────────────────────────────────────────────────────
+                    if (
+                        stage == 0
+                        and rr_achieved >= self.step1_rr_trigger
+                        and profit_pips > 0
+                    ):
+                        try:
+                            lock_pips = self.step1_lock_in_pips
+                            if direction == 'BUY':
+                                # SL below current price, above entry to lock profit
+                                new_sl = entry_price + lock_pips * pip_size
+                                max_allowed = current_price - (1.0 * pip_size)
+                                new_sl = min(new_sl, max_allowed)
+                            else:
+                                # For shorts, SL must be above current price, below entry to lock profit
+                                new_sl = entry_price - lock_pips * pip_size
+                                min_allowed = current_price + (1.0 * pip_size)
+                                new_sl = max(new_sl, min_allowed)
+
+                            # Symbol-appropriate rounding
+                            decimals = 3 if 'JPY' in symbol else 5
+                            new_sl = round(new_sl, decimals)
+
+                            trades = self.oanda.get_trades()
+                            for t in trades:
+                                trade_instrument = t.get('instrument') or t.get('symbol')
+                                trade_id = (
+                                    t.get('id')
+                                    or t.get('tradeID')
+                                    or t.get('trade_id')
+                                )
+                                if not trade_id:
+                                    continue
+                                if trade_instrument and trade_instrument.replace('.', '_').upper() == symbol:
+                                    set_resp = self.oanda.set_trade_stop(trade_id, new_sl)
+
+                                    log_narration(
+                                        event_type="STEP1_SL_BE_LOCK",
+                                        details={
+                                            "order_id": order_id,
+                                            "trade_id": trade_id,
+                                            "symbol": symbol,
+                                            "direction": direction,
+                                            "entry_price": entry_price,
+                                            "new_sl": new_sl,
+                                            "profit_pips": profit_pips,
+                                            "rr_achieved": rr_achieved,
+                                            "response": set_resp,
+                                        },
+                                        symbol=symbol,
+                                        venue="oanda",
+                                    )
+
+                                    pos['two_step_stage'] = 1
+                                    pos['step1_sl'] = new_sl
+                                    self.display.success(
+                                        f"🔪 STEP 1: {symbol} SL moved to BE+{lock_pips:.1f} pips (trade {trade_id})"
+                                    )
+                                    break
+
+                            # Do not attempt STEP 2 in the same loop iteration
+                            continue
+
+                        except Exception as e:
+                            self.display.error(f"Error in STEP 1 SL adjustment for {symbol}: {e}")
+                            log_narration(
+                                event_type="STEP1_SL_ERROR",
+                                details={"order_id": order_id, "error": str(e)},
+                                symbol=symbol,
+                                venue="oanda",
+                            )
+                            # Fall through to next trade
+                            continue
+
+                    # ──────────────────────────────────────────────────────────────
+                    # Hive & Momentum signals (for STEP 2 gating)
+                    # ──────────────────────────────────────────────────────────────
                     hive_signal_confirmed = False
                     momentum_signal_confirmed = False
 
                     # Query Hive Mind for consensus on this instrument
                     if self.hive_mind:
-                        market_data = {
-                            "symbol": symbol.replace('_', ''),
-                            "current_price": current_price,
-                            "timeframe": "M15"
-                        }
+                        try:
+                            market_data = {
+                                "symbol": symbol.replace('_', ''),
+                                "current_price": current_price,
+                                "timeframe": "M15",
+                            }
 
-                        analysis = self.hive_mind.delegate_analysis(market_data)
-                        consensus = analysis.consensus_signal
-                        confidence = analysis.consensus_confidence
+                            analysis = self.hive_mind.delegate_analysis(market_data)
+                            consensus = analysis.consensus_signal
+                            confidence = analysis.consensus_confidence
 
-                        # Log the analysis
-                        log_narration(
-                            event_type="HIVE_ANALYSIS",
-                            details={
-                                "symbol": symbol,
-                                "consensus": consensus.value if hasattr(consensus, 'value') else str(consensus),
-                                "confidence": confidence,
-                                "order_id": order_id,
-                                "profit_atr": profit_atr_multiple
-                            },
-                            symbol=symbol,
-                            venue="hive"
-                        )
+                            # Log the analysis
+                            log_narration(
+                                event_type="HIVE_ANALYSIS",
+                                details={
+                                    "symbol": symbol,
+                                    "consensus": (
+                                        consensus.value
+                                        if hasattr(consensus, 'value')
+                                        else str(consensus)
+                                    ),
+                                    "confidence": confidence,
+                                    "order_id": order_id,
+                                    "profit_atr": profit_atr_multiple,
+                                },
+                                symbol=symbol,
+                                venue="hive",
+                            )
 
-                        # Check hive consensus threshold
-                        if confidence >= self.hive_trigger_confidence and consensus in (SignalStrength.STRONG_BUY, SignalStrength.STRONG_SELL):
-                            if (direction == 'BUY' and consensus == SignalStrength.STRONG_BUY) or (direction == 'SELL' and consensus == SignalStrength.STRONG_SELL):
-                                hive_signal_confirmed = True
-                                self.display.info(f"Hive signal: {consensus.value} ({confidence:.2f}) for {symbol}", Colors.BRIGHT_CYAN)
+                            # Check hive consensus threshold
+                            if (
+                                confidence >= self.hive_trigger_confidence
+                                and consensus in (SignalStrength.STRONG_BUY, SignalStrength.STRONG_SELL)
+                            ):
+                                if (
+                                    direction == 'BUY'
+                                    and consensus == SignalStrength.STRONG_BUY
+                                ) or (
+                                    direction == 'SELL'
+                                    and consensus == SignalStrength.STRONG_SELL
+                                ):
+                                    hive_signal_confirmed = True
+                                    self.display.info(
+                                        f"Hive signal: {consensus.value} ({confidence:.2f}) for {symbol}",
+                                        Colors.BRIGHT_CYAN,
+                                    )
+                        except Exception as e:
+                            self.display.warning(f"Hive analysis error for {symbol}: {e}")
 
                     # Use MomentumDetector from rbotzilla_golden_age.py
                     if self.momentum_detector and profit_atr_multiple > 0:
-                        # Assume moderate trend and normal volatility for simple case
-                        # (In production, you'd query actual regime/volatility from ML modules)
-                        trend_strength = 0.7  # Moderate trend assumption
-                        market_cycle = 'BULL_MODERATE'  # Default assumption
-                        volatility = 1.0  # Normal volatility
+                        try:
+                            # Simple assumptions; in full system you'd plug real regime data
+                            trend_strength = 0.7
+                            market_cycle = 'BULL_MODERATE'
+                            volatility = 1.0
 
-                        has_momentum, momentum_strength = self.momentum_detector.detect_momentum(
-                            profit_atr_multiple=profit_atr_multiple,
-                            trend_strength=trend_strength,
-                            cycle=market_cycle,
-                            volatility=volatility
-                        )
-
-                        if has_momentum:
-                            momentum_signal_confirmed = True
-                            self.display.info(f"Momentum detected: {momentum_strength:.2f}x strength for {symbol} (profit: {profit_atr_multiple:.2f}x ATR)", Colors.BRIGHT_GREEN)
-                            
-                            log_narration(
-                                event_type="MOMENTUM_DETECTED",
-                                details={
-                                    "symbol": symbol,
-                                    "profit_atr": profit_atr_multiple,
-                                    "momentum_strength": momentum_strength,
-                                    "order_id": order_id
-                                },
-                                symbol=symbol,
-                                venue="momentum_detector"
+                            has_momentum, momentum_strength = self.momentum_detector.detect_momentum(
+                                profit_atr_multiple=profit_atr_multiple,
+                                trend_strength=trend_strength,
+                                cycle=market_cycle,
+                                volatility=volatility,
                             )
 
-                    # Trigger TP cancellation if EITHER signal confirmed
-                    if hive_signal_confirmed or momentum_signal_confirmed:
-                        trigger_source = []
-                        if hive_signal_confirmed:
-                            trigger_source.append("Hive")
-                        if momentum_signal_confirmed:
-                            trigger_source.append("Momentum")
-                        
-                        self.display.alert(f"{'|'.join(trigger_source)} signal(s) detected for {symbol} - converting OCO to trailing SL", "INFO")
+                            if has_momentum:
+                                momentum_signal_confirmed = True
+                                self.display.info(
+                                    f"Momentum detected: {momentum_strength:.2f}x strength for "
+                                    f"{symbol} (profit: {profit_atr_multiple:.2f}x ATR)",
+                                    Colors.BRIGHT_GREEN,
+                                )
 
-                        # Attempt to cancel TP order(s) associated with this OCO
+                                log_narration(
+                                    event_type="MOMENTUM_DETECTED",
+                                    details={
+                                        "symbol": symbol,
+                                        "profit_atr": profit_atr_multiple,
+                                        "momentum_strength": momentum_strength,
+                                        "order_id": order_id,
+                                    },
+                                    symbol=symbol,
+                                    venue="momentum_detector",
+                                )
+                        except Exception as e:
+                            self.display.warning(f"Momentum detection error for {symbol}: {e}")
+
+                    # ──────────────────────────────────────────────────────────────
+                    # STEP 2: cancel TP & convert to trailing SL
+                    # ──────────────────────────────────────────────────────────────
+                    should_convert_to_trailing = False
+                    trigger_source = []
+
+                    # Condition 1: pure R-multiple (e.g. >= 2R)
+                    if rr_achieved >= self.step2_rr_trigger:
+                        should_convert_to_trailing = True
+                        trigger_source.append("RR")
+
+                    # Condition 2: strong Hive alignment
+                    if hive_signal_confirmed:
+                        should_convert_to_trailing = True
+                        trigger_source.append("Hive")
+
+                    # Condition 3: strong Momentum confirmation
+                    if momentum_signal_confirmed:
+                        should_convert_to_trailing = True
+                        trigger_source.append("Momentum")
+
+                    # Only execute STEP 2 if:
+                    # - toggle is ON
+                    # - we have at least reached STEP 1
+                    # - TP not already cancelled
+                    if not self.enable_step2_trailing and should_convert_to_trailing:
+                        log_narration(
+                            event_type="STEP2_DISABLED_SKIP",
+                            details={
+                                "order_id": order_id,
+                                "symbol": symbol,
+                                "rr_achieved": rr_achieved,
+                                "trigger_source": trigger_source,
+                            },
+                            symbol=symbol,
+                            venue="oanda",
+                        )
+
+                    if (
+                        self.enable_step2_trailing
+                        and should_convert_to_trailing
+                        and not pos.get('tp_cancelled')
+                        and pos.get('two_step_stage', 0) >= 1
+                    ):
+                        self.display.alert(
+                            f"{'|'.join(trigger_source)} signal(s) for {symbol} - converting OCO to trailing SL",
+                            "INFO",
+                        )
+
                         try:
+                            # Cancel the original OCO/TP order
                             cancel_resp = self.oanda.cancel_order(order_id)
 
                             log_narration(
@@ -1402,17 +1963,21 @@ class OandaTradingEngine:
                                     "order_id": order_id,
                                     "trigger_source": trigger_source,
                                     "profit_atr": profit_atr_multiple,
-                                    "cancel_response": cancel_resp
+                                    "cancel_response": cancel_resp,
                                 },
                                 symbol=symbol,
-                                venue="oanda"
+                                venue="oanda",
                             )
 
-                            # Find open trades for this symbol and set an initial trailing stop
+                            # Find the live trade and apply an adaptive trailing SL
                             trades = self.oanda.get_trades()
                             for t in trades:
                                 trade_instrument = t.get('instrument') or t.get('symbol')
-                                trade_id = t.get('id') or t.get('tradeID') or t.get('trade_id')
+                                trade_id = (
+                                    t.get('id')
+                                    or t.get('tradeID')
+                                    or t.get('trade_id')
+                                )
                                 if not trade_id:
                                     continue
                                 if trade_instrument and trade_instrument.replace('.', '_').upper() == symbol:
@@ -1422,24 +1987,36 @@ class OandaTradingEngine:
                                         trail_distance = self.trailing_system.calculate_dynamic_trailing_distance(
                                             profit_atr_multiple=profit_atr_multiple,
                                             atr=atr_price,
-                                            momentum_active=True
+                                            momentum_active=True,
                                         )
-                                        
+
+                                        # Ensure we at least lock some profit
+                                        min_lock = self.min_trailing_lock_pips * pip_size
                                         if direction == 'BUY':
-                                            new_sl = current_price - trail_distance
+                                            raw_sl = current_price - trail_distance
+                                            # never below BE+min_lock
+                                            be_plus = entry_price + min_lock
+                                            adaptive_sl = max(raw_sl, be_plus)
+                                            # must still be below current price
+                                            adaptive_sl = min(
+                                                adaptive_sl,
+                                                current_price - (1.0 * pip_size),
+                                            )
                                         else:
-                                            new_sl = current_price + trail_distance
-                                        
-                                        # Ensure new SL is better than original
-                                        original_sl = pos.get('stop_loss')
-                                        if direction == 'BUY':
-                                            adaptive_sl = max(new_sl, original_sl)
-                                        else:
-                                            adaptive_sl = min(new_sl, original_sl)
+                                            raw_sl = current_price + trail_distance
+                                            be_minus = entry_price - min_lock
+                                            adaptive_sl = min(raw_sl, be_minus)
+                                            # must be above current price
+                                            adaptive_sl = max(
+                                                adaptive_sl,
+                                                current_price + (1.0 * pip_size),
+                                            )
+
+                                        decimals = 3 if 'JPY' in symbol else 5
+                                        adaptive_sl = round(adaptive_sl, decimals)
                                     else:
-                                        # Fallback: use existing stop_loss
                                         adaptive_sl = pos.get('stop_loss')
-                                    
+
                                     set_resp = self.oanda.set_trade_stop(trade_id, adaptive_sl)
 
                                     log_narration(
@@ -1448,28 +2025,40 @@ class OandaTradingEngine:
                                             "trade_id": trade_id,
                                             "order_id": order_id,
                                             "set_stop": adaptive_sl,
-                                            "trail_distance_pips": (current_price - adaptive_sl) / pip_size if direction == 'BUY' else (adaptive_sl - current_price) / pip_size,
+                                            "trail_distance_pips": (
+                                                (current_price - adaptive_sl) / pip_size
+                                                if direction == 'BUY'
+                                                else (adaptive_sl - current_price) / pip_size
+                                            ),
                                             "set_resp": set_resp,
-                                            "trigger_source": trigger_source
+                                            "trigger_source": trigger_source,
                                         },
                                         symbol=symbol,
-                                        venue="oanda"
+                                        venue="oanda",
                                     )
 
-                                    # Mark position as having TP cancelled
+                                    # Mark position as converted to trailing
                                     pos['tp_cancelled'] = True
                                     pos['tp_cancelled_timestamp'] = datetime.now(timezone.utc)
                                     pos['tp_cancel_source'] = trigger_source
-                                    self.display.success(f"✅ TP cancelled and adaptive trailing SL set for trade {trade_id} ({symbol})")
+                                    pos['two_step_stage'] = 2
+                                    pos['stop_loss'] = adaptive_sl
+
+                                    self.display.success(
+                                        f"✅ STEP 2: TP cancelled and adaptive trailing SL set "
+                                        f"for trade {trade_id} ({symbol})"
+                                    )
                                     break
 
                         except Exception as e:
-                            self.display.error(f"Error during TP cancellation/trailing conversion: {e}")
+                            self.display.error(
+                                f"Error during STEP 2 TP cancellation/trailing conversion for {symbol}: {e}"
+                            )
                             log_narration(
                                 event_type="TP_CANCEL_ERROR",
                                 details={"order_id": order_id, "error": str(e)},
                                 symbol=symbol,
-                                venue="oanda"
+                                venue="oanda",
                             )
 
                 # Sleep short interval before next pass
@@ -1477,7 +2066,134 @@ class OandaTradingEngine:
             except Exception as e:
                 self.display.error(f"TradeManager loop error: {e}")
                 await asyncio.sleep(5)
-    
+
+                    # Use MomentumDetector from rbotzilla_golden_age.py
+#                     if self.momentum_detector and profit_atr_multiple > 0:
+#                         # Assume moderate trend and normal volatility for simple case
+#                         # (In production, you'd query actual regime/volatility from ML modules)
+#                         trend_strength = 0.7  # Moderate trend assumption
+#                         market_cycle = 'BULL_MODERATE'  # Default assumption
+#                         volatility = 1.0  # Normal volatility
+# 
+#                         has_momentum, momentum_strength = self.momentum_detector.detect_momentum(
+#                             profit_atr_multiple=profit_atr_multiple,
+#                             trend_strength=trend_strength,
+#                             cycle=market_cycle,
+#                             volatility=volatility
+#                         )
+# 
+#                         if has_momentum:
+#                             momentum_signal_confirmed = True
+#                             self.display.info(f"Momentum detected: {momentum_strength:.2f}x strength for {symbol} (profit: {profit_atr_multiple:.2f}x ATR)", Colors.BRIGHT_GREEN)
+#                             
+#                             log_narration(
+#                                 event_type="MOMENTUM_DETECTED",
+#                                 details={
+#                                     "symbol": symbol,
+#                                     "profit_atr": profit_atr_multiple,
+#                                     "momentum_strength": momentum_strength,
+#                                     "order_id": order_id
+#                                 },
+#                                 symbol=symbol,
+#                                 venue="momentum_detector"
+#                             )
+# 
+#                     # Trigger TP cancellation if EITHER signal confirmed
+#                     if hive_signal_confirmed or momentum_signal_confirmed:
+#                         trigger_source = []
+#                         if hive_signal_confirmed:
+#                             trigger_source.append("Hive")
+#                         if momentum_signal_confirmed:
+#                             trigger_source.append("Momentum")
+#                         
+#                         self.display.alert(f"{'|'.join(trigger_source)} signal(s) detected for {symbol} - converting OCO to trailing SL", "INFO")
+# 
+#                         # Attempt to cancel TP order(s) associated with this OCO
+#                         try:
+#                             cancel_resp = self.oanda.cancel_order(order_id)
+# 
+#                             log_narration(
+#                                 event_type="TP_CANCEL_ATTEMPT",
+#                                 details={
+#                                     "order_id": order_id,
+#                                     "trigger_source": trigger_source,
+#                                     "profit_atr": profit_atr_multiple,
+#                                     "cancel_response": cancel_resp
+#                                 },
+#                                 symbol=symbol,
+#                                 venue="oanda"
+#                             )
+# 
+#                             # Find open trades for this symbol and set an initial trailing stop
+#                             trades = self.oanda.get_trades()
+#                             for t in trades:
+#                                 trade_instrument = t.get('instrument') or t.get('symbol')
+#                                 trade_id = t.get('id') or t.get('tradeID') or t.get('trade_id')
+#                                 if not trade_id:
+#                                     continue
+#                                 if trade_instrument and trade_instrument.replace('.', '_').upper() == symbol:
+#                                     # Calculate adaptive trailing stop using SmartTrailingSystem
+#                                     if self.trailing_system and profit_atr_multiple > 0:
+#                                         atr_price = estimated_atr_pips * pip_size
+#                                         trail_distance = self.trailing_system.calculate_dynamic_trailing_distance(
+#                                             profit_atr_multiple=profit_atr_multiple,
+#                                             atr=atr_price,
+#                                             momentum_active=True
+#                                         )
+#                                         
+#                                         if direction == 'BUY':
+#                                             new_sl = current_price - trail_distance
+#                                         else:
+#                                             new_sl = current_price + trail_distance
+#                                         
+#                                         # Ensure new SL is better than original
+#                                         original_sl = pos.get('stop_loss')
+#                                         if direction == 'BUY':
+#                                             adaptive_sl = max(new_sl, original_sl)
+#                                         else:
+#                                             adaptive_sl = min(new_sl, original_sl)
+#                                     else:
+#                                         # Fallback: use existing stop_loss
+#                                         adaptive_sl = pos.get('stop_loss')
+#                                     
+#                                     set_resp = self.oanda.set_trade_stop(trade_id, adaptive_sl)
+# 
+#                                     log_narration(
+#                                         event_type="TRAILING_SL_SET",
+#                                         details={
+#                                             "trade_id": trade_id,
+#                                             "order_id": order_id,
+#                                             "set_stop": adaptive_sl,
+#                                             "trail_distance_pips": (current_price - adaptive_sl) / pip_size if direction == 'BUY' else (adaptive_sl - current_price) / pip_size,
+#                                             "set_resp": set_resp,
+#                                             "trigger_source": trigger_source
+#                                         },
+#                                         symbol=symbol,
+#                                         venue="oanda"
+#                                     )
+# 
+#                                     # Mark position as having TP cancelled
+#                                     pos['tp_cancelled'] = True
+#                                     pos['tp_cancelled_timestamp'] = datetime.now(timezone.utc)
+#                                     pos['tp_cancel_source'] = trigger_source
+#                                     self.display.success(f"✅ TP cancelled and adaptive trailing SL set for trade {trade_id} ({symbol})")
+#                                     break
+# 
+#                         except Exception as e:
+#                             self.display.error(f"Error during TP cancellation/trailing conversion: {e}")
+#                             log_narration(
+#                                 event_type="TP_CANCEL_ERROR",
+#                                 details={"order_id": order_id, "error": str(e)},
+#                                 symbol=symbol,
+#                                 venue="oanda"
+#                             )
+# 
+#                 # Sleep short interval before next pass
+#                 await asyncio.sleep(5)
+#             except Exception as e:
+#                 self.display.error(f"TradeManager loop error: {e}")
+#                 await asyncio.sleep(5)
+#     
     def _handle_position_closed(self, trade_id: str):
         """Handle a closed position"""
         if trade_id not in self.active_positions:
@@ -1579,7 +2295,7 @@ class OandaTradingEngine:
                             candles = self.oanda.get_historical_data(_candidate, count=120, granularity="M15")
                             
                             # STEP 1: Get base momentum signal
-                            sig, conf = generate_signal(_candidate, candles)  # returns ("BUY"/"SELL", confidence) or (None, 0)
+                            sig, conf, meta = generate_signal(_candidate, candles)  # returns ("BUY"/"SELL", confidence, meta) or (None, 0, {})
                             
                             if not sig or sig not in ("BUY", "SELL"):
                                 continue
@@ -1866,3 +2582,5 @@ try:
     _rbz_force_min_notional_position_police()
 except Exception as _e:
     print('[RBZ_POLICE] error', _e)
+
+'''

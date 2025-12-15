@@ -1,0 +1,13 @@
+Starting unified RBOTzilla in PAPER mode with IBKR enabled (BOT_MAX_TRADES_IBKR=3)...
+Started OANDA Engine: PID 2839666 — logs -> logs/live.log
+Started IBKR Engine: PID 2839667 — logs -> logs/ibkr_engine.log
+nohup: ignoring input
+/home/ing/RICK/RICK_LIVE_CLEAN/run_autonomous_full.py:62: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  print(f"⏰ Started: {datetime.utcnow().isoformat()}")
+[H[2J[3Jnohup: ignoring input
+/home/ing/RICK/RICK_LIVE_CLEAN/run_autonomous_full.py:62: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  print(f"⏰ Started: {datetime.utcnow().isoformat()}")
+[H[2J[3Jnohup: ignoring input
+/home/ing/RICK/RICK_LIVE_CLEAN/run_autonomous_full.py:62: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  print(f"⏰ Started: {datetime.utcnow().isoformat()}")
+[H[2J[3J

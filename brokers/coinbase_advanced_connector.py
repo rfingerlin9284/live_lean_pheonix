@@ -14,6 +14,14 @@ import hashlib
 from typing import Dict, List, Optional, Tuple
 from decimal import Decimal
 import requests
+from datetime import datetime
+from zoneinfo import ZoneInfo
+
+try:
+    from util.platform_breaker import is_platform_enabled
+except Exception:
+    def is_platform_enabled(platform: str) -> bool:
+        return True
 RESTClient = None
 
 # Add foundation path
@@ -24,7 +32,7 @@ class CoinbaseAdvancedConnector:
     Coinbase Advanced API connector with RICK Charter compliance
     """
     
-    def __init__(self, pin: int = None):
+    def __init__(self, pin: Optional[int] = None):
         """Initialize with PIN verification for live trading"""
         self.pin = pin
         self.is_live = False
@@ -181,8 +189,35 @@ class CoinbaseAdvancedConnector:
         """
         Validate order against safety constraints
         """
+        # Platform breaker: allow disabling Coinbase only, without stopping the whole system.
+        if not is_platform_enabled('coinbase'):
+            return False, 'Coinbase platform breaker is OFF'
+        # Optional venue policy config (non-secret). If missing/unreadable, fall back to env/defaults.
+        policy = {}
+        try:
+            policy_path = os.path.join(os.path.dirname(__file__), '..', 'config', 'venue_policies.json')
+            with open(policy_path, 'r') as f:
+                policy = (json.load(f) or {}).get('coinbase', {}) or {}
+        except Exception:
+            policy = {}
+
+        # Optional live time window enforcement (safety feature)
+        try:
+            if bool(policy.get('enforce_time_windows_live', False)) and bool(getattr(self, 'is_live', False)):
+                windows = policy.get('time_windows_newyork', []) or []
+                if not self._is_now_in_ny_windows(windows):
+                    return False, "Live Coinbase blocked by time window policy (avoid off-hours)"
+        except Exception:
+            # If time window parsing fails, do NOT block trading unexpectedly.
+            pass
+
         # Check symbol is approved
-        approved_pairs = os.environ.get('CDP_ALLOWED_PAIRS', 'BTC-USD,ETH-USD').split(',')
+        approved_pairs = None
+        pol_pairs = policy.get('allowed_pairs') if isinstance(policy, dict) else None
+        if isinstance(pol_pairs, list) and pol_pairs:
+            approved_pairs = [str(x).strip() for x in pol_pairs if str(x).strip()]
+        if not approved_pairs:
+            approved_pairs = [p.strip() for p in os.environ.get('CDP_ALLOWED_PAIRS', 'BTC-USD,ETH-USD').split(',') if p.strip()]
         if symbol not in approved_pairs:
             return False, f"Symbol {symbol} not in approved pairs: {approved_pairs}"
             
@@ -191,11 +226,52 @@ class CoinbaseAdvancedConnector:
             return False, f"Position size ${size_usd:,.2f} exceeds max ${self.max_position_usd:,.2f}"
             
         # Check minimum notional
-        min_notional = float(os.environ.get('CDP_MIN_NOTIONAL_USD', '100'))
+        min_notional = None
+        try:
+            pol_min = policy.get('min_notional_usd') if isinstance(policy, dict) else None
+            if pol_min is not None:
+                min_notional = float(pol_min)
+        except Exception:
+            min_notional = None
+        if min_notional is None:
+            min_notional = float(os.environ.get('CDP_MIN_NOTIONAL_USD', '100'))
         if size_usd < min_notional:
             return False, f"Position size ${size_usd:,.2f} below minimum ${min_notional:,.2f}"
             
         return True, "Order validation passed"
+
+    def _is_now_in_ny_windows(self, windows: List[Dict]) -> bool:
+        """Return True if current New York local time is inside any provided window.
+
+        Window format:
+          {"days": ["MON",...], "start": "HH:MM", "end": "HH:MM"}
+        Times are New York local clock times.
+        """
+        ny = ZoneInfo("America/New_York")
+        now_ny = datetime.now(tz=ny)
+        dow = now_ny.weekday()  # 0=Mon
+        day_map = {"MON": 0, "TUE": 1, "WED": 2, "THU": 3, "FRI": 4, "SAT": 5, "SUN": 6}
+
+        def parse_hhmm(s: str) -> Tuple[int, int]:
+            parts = str(s).strip().split(':')
+            return int(parts[0]), int(parts[1])
+
+        for w in windows or []:
+            try:
+                days = w.get('days') or ['MON', 'TUE', 'WED', 'THU', 'FRI']
+                days_int = {day_map.get(str(d).upper(), 0) for d in days}
+                if dow not in days_int:
+                    continue
+                sh, sm = parse_hhmm(w.get('start', '00:00'))
+                eh, em = parse_hhmm(w.get('end', '23:59'))
+                start_min = sh * 60 + sm
+                end_min = eh * 60 + em
+                now_min = now_ny.hour * 60 + now_ny.minute
+                if start_min <= now_min <= end_min:
+                    return True
+            except Exception:
+                continue
+        return False
         
     def place_market_order(self, symbol: str, side: str, size_usd: float) -> Dict:
         """
@@ -355,7 +431,7 @@ class CoinbaseConnector:
     This provides the API the engines expect: get_balance(), place_order(), place_market_order(), get_live_prices(), etc.
     It uses CoinbaseAdvancedConnector under the hood if available, otherwise falls back to the simple interface.
     """
-    def __init__(self, pin: int = None, environment: str = 'practice', mode: str = 'canary'):
+    def __init__(self, pin: Optional[int] = None, environment: str = 'practice', mode: str = 'canary'):
         self.mode = mode
         try:
             self._impl = CoinbaseAdvancedConnector(pin=pin)

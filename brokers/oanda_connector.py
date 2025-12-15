@@ -11,12 +11,19 @@ import time
 import logging
 import requests
 import threading
+from pathlib import Path
 from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass, asdict
 from enum import Enum
 from datetime import datetime, timezone, timedelta
 import websocket
 from urllib.parse import urljoin, urlencode
+
+try:
+    from util.platform_breaker import is_platform_enabled
+except Exception:
+    def is_platform_enabled(platform: str) -> bool:
+        return True
 
 # Charter compliance imports
 try:
@@ -132,6 +139,7 @@ class OandaConnector:
         
         self.environment = environment
         self.logger = logging.getLogger(__name__)
+        self.trading_enabled = False
         
         # Load API credentials from environment
         self._load_credentials()
@@ -144,12 +152,13 @@ class OandaConnector:
             self.api_base = "https://api-fxpractice.oanda.com"
             self.stream_base = "https://stream-fxpractice.oanda.com"
         
-        # Headers for API requests
+        # Headers for API requests (Authorization added if token loaded)
         self.headers = {
-            "Authorization": f"Bearer {self.api_token}",
             "Content-Type": "application/json",
             "Accept-Datetime-Format": "RFC3339"
         }
+        if self.api_token:
+            self.headers["Authorization"] = f"Bearer {self.api_token}"
         
         # Performance tracking
         self.request_times = []
@@ -163,61 +172,158 @@ class OandaConnector:
         
         # Validate connection
         self._validate_connection()
+
+    def check_authorization(self) -> tuple:
+        """
+        Check if the OANDA API credentials are valid by making a test request.
+        Returns: (success: bool, message: str)
+        """
+        if not self.api_token or not self.account_id:
+            return False, "Missing API token or account ID"
+        
+        try:
+            url = f"{self.api_base}/v3/accounts/{self.account_id}/summary"
+            response = requests.get(url, headers=self.headers, timeout=self.default_timeout)
+            if response.status_code == 200:
+                data = response.json()
+                balance = data.get('account', {}).get('balance', 'N/A')
+                return True, f"Account {self.account_id[-4:]} balance: {balance}"
+            elif response.status_code == 401:
+                return False, f"401 Unauthorized - Invalid API token"
+            else:
+                return False, f"HTTP {response.status_code}: {response.text[:100]}"
+        except requests.exceptions.Timeout:
+            return False, "Connection timeout"
+        except Exception as e:
+            return False, f"Connection error: {str(e)}"
     
     def _load_credentials(self):
-        """Load API credentials based on environment toggle.
+        """Load API credentials from environment or .env file with safe defaults."""
+        # Practice credentials are expected to rotate. To avoid brittle in-code secrets,
+        # prefer:
+        #   1) explicit environment variables, then
+        #   2) repo-local token files (token_practice.txt / token_paper.txt), then
+        #   3) finally a last-resort placeholder.
+        PRACTICE_ACCOUNT_ID_DEFAULT = "101-001-31210531-002"
+
+        def _read_token_file(path: Path) -> Optional[str]:
+            try:
+                if not path.is_file():
+                    return None
+                token = path.read_text(encoding="utf-8").strip().splitlines()[0].strip()
+                if not token:
+                    return None
+                # Basic sanity: OANDA personal access tokens are long hex-ish strings with a dash.
+                if len(token) < 20:
+                    return None
+                return token
+            except Exception:
+                return None
         
-        PRACTICE MODE: Uses hard-coded demo credentials (safe for testing)
-        LIVE MODE: Uses hard-coded live credentials (real money!)
-        
-        To switch modes: Set RICK_ENV=practice or RICK_ENV=live
-        """
-        # ============================================================
-        # PRACTICE CREDENTIALS (Demo/Paper Trading - No Real Money)
-        # ============================================================
-        PRACTICE_API_TOKEN = "c21c371d6e31bd37c8c5a864333bbf14-8877c54e49b181ef3a99ee6261673207"
-        PRACTICE_ACCOUNT_ID = "101-001-31210531-002"
-        
-        # ============================================================
-        # LIVE CREDENTIALS (Real Money Trading - BE CAREFUL!)
-        # When ready to go live, replace these with your real credentials
-        # ============================================================
-        LIVE_API_TOKEN = None  # <-- PUT YOUR LIVE API TOKEN HERE
-        LIVE_ACCOUNT_ID = None  # <-- PUT YOUR LIVE ACCOUNT ID HERE
-        
-        # ============================================================
-        # TOGGLE: Select credentials based on environment
-        # ============================================================
-        if self.environment == "live":
-            self.api_token = LIVE_API_TOKEN
-            self.account_id = LIVE_ACCOUNT_ID
-            if not self.api_token or not self.account_id:
-                self.logger.error("⚠️  LIVE MODE SELECTED but credentials not configured!")
-                self.logger.error("    Edit brokers/oanda_connector.py and set LIVE_API_TOKEN and LIVE_ACCOUNT_ID")
+        repo_root = Path(__file__).resolve().parents[1]
+        env_file = repo_root / '.env'
+        should_load_envfile = os.environ.get('OANDA_LOAD_ENV_FILE', '1').lower() in ('1', 'true', 'yes')
+
+        if should_load_envfile and not env_file.exists():
+            try:
+                env_file.write_text(
+                    "# Auto-generated placeholder for OANDA credentials\n"
+                    "# Fill in the values before enabling live trading.\n"
+                    "OANDA_PAPER=\n"
+                    "OANDA_PRACTICE_ACCOUNT_ID=\n"
+                    "OANDA_LIVE_TOKEN=\n"
+                    "OANDA_LIVE_ACCOUNT_ID=\n"
+                )
+                self.logger.info(f"Created placeholder .env file at {env_file} for missing OANDA secrets")
+            except Exception as exc:
+                self.logger.warning(f"Unable to create placeholder .env file: {exc}")
+
+        if env_file.exists() and should_load_envfile:
+            try:
+                self.logger.info(f"Loading OANDA credentials from {env_file}")
+                with env_file.open() as f:
+                    for line in f:
+                        line = line.strip()
+                        if not line or line.startswith('#') or '=' not in line:
+                            continue
+                        key, value = line.split('=', 1)
+                        key = key.strip()
+                        value = value.strip().strip('"\'')
+                        if not value:
+                            continue
+                        if os.environ.get(key):
+                            continue
+                        os.environ[key] = value
+            except Exception as exc:
+                self.logger.warning(f"Failed to read {env_file}: {exc}")
+        elif should_load_envfile:
+            self.logger.debug(".env file not found; relying on existing environment variables for OANDA credentials")
+
+        practice_token = (
+            os.getenv('OANDA_PAPER')
+            or os.getenv('OANDA_PRACTICE')
+            or os.getenv('OANDA_PRACTICE_TOKEN')
+            or os.getenv('OANDA_TOKEN')
+            or os.getenv('OANDA_ACCESS_TOKEN')
+        )
+        practice_account = os.getenv('OANDA_PRACTICE_ACCOUNT_ID') or os.getenv('OANDA_ACCOUNT_ID')
+
+        # If practice token is not provided via env, try repo-local token files.
+        if not practice_token:
+            practice_token = (
+                _read_token_file(repo_root / 'token_practice.txt')
+                or _read_token_file(repo_root / 'token_paper.txt')
+            )
+
+        live_token = (
+            os.getenv('OANDA_LIVE_TOKEN')
+            or os.getenv('OANDA_ACCESS_TOKEN')
+            or os.getenv('OANDA_API_KEY')
+            or os.getenv('OANDA_TOKEN')
+        )
+        live_account = os.getenv('OANDA_LIVE_ACCOUNT_ID') or os.getenv('OANDA_ACCOUNT_ID')
+
+        if self.environment == 'live':
+            self.api_token = live_token.strip() if live_token else None
+            self.account_id = live_account.strip() if live_account else None
         else:
-            # Practice mode (default - safe)
-            self.api_token = PRACTICE_API_TOKEN
-            self.account_id = PRACTICE_ACCOUNT_ID
-        
-        # Validate credentials are set
-        if not self.api_token:
-            self.logger.warning(f"OANDA {self.environment} token not configured")
-        
-        if not self.account_id:
-            self.logger.warning(f"OANDA {self.environment} account ID not configured")
+            # Practice: prefer environment / repo token files; default account id if missing.
+            self.api_token = practice_token.strip() if practice_token else None
+            self.account_id = (practice_account.strip() if practice_account else PRACTICE_ACCOUNT_ID_DEFAULT)
+
+            # Seed common env vars for downstream components (without overriding explicit user env).
+            if self.api_token:
+                os.environ.setdefault('OANDA_PAPER', self.api_token)
+                os.environ.setdefault('OANDA_PRACTICE_TOKEN', self.api_token)
+            if self.account_id:
+                os.environ.setdefault('OANDA_PRACTICE_ACCOUNT_ID', self.account_id)
+
+            if self.api_token:
+                self.logger.info(f"Practice token loaded (…{self.api_token[-4:]}); account=****{self.account_id[-4:]}")
+            else:
+                self.logger.warning(
+                    "Practice token missing. Set OANDA_PAPER/OANDA_PRACTICE_TOKEN or put it in token_practice.txt"
+                )
     
     def _validate_connection(self):
         """Validate OANDA connection and credentials"""
-        if self.environment == "live" and (not self.api_token or not self.account_id):
-            self.logger.warning("LIVE OANDA credentials not configured - trading will be disabled")
-        elif self.environment == "practice" and (not self.api_token or self.api_token == "your_practice_token_here"):
-            self.logger.warning("Practice OANDA credentials not configured - using simulation mode")
+        self.trading_enabled = bool(self.api_token and self.account_id)
+        account_suffix = None
+        if self.account_id and len(self.account_id) > 4:
+            account_suffix = self.account_id[-4:]
+        account_display = f"****{account_suffix}" if account_suffix else (self.account_id or 'N/A')
+
+        if not self.trading_enabled:
+            if self.environment == "live":
+                self.logger.warning("LIVE OANDA credentials not configured - trading will be disabled")
+            else:
+                self.logger.warning("Practice OANDA credentials not configured - trading is paused")
         else:
-            self.logger.info(f"OANDA {self.environment} credentials validated")
+            self.logger.info(f"OANDA {self.environment} credentials validated; account={account_display}")
     
-    def place_oco_order(self, instrument: str, entry_price: float, stop_loss: float, 
-                       take_profit: float, units: int, ttl_hours: float = 24.0, 
-                       order_type: str = "LIMIT", explanation: str = None) -> Dict[str, Any]:
+    def place_oco_order(self, instrument: str, entry_price: float, stop_loss: float,
+                       take_profit: Optional[float] = None, units: int = 0, ttl_hours: float = 24.0,
+                       order_type: str = "LIMIT", explanation: Optional[str] = None) -> Dict[str, Any]:
         """
         Place OCO order using OANDA's bracket order functionality - LIVE VERSION
         
@@ -235,16 +341,36 @@ class OandaConnector:
         """
         start_time = time.time()
 
-        # Enforce immutable/mandatory OCO: stop_loss and take_profit must be provided
-        if stop_loss is None or take_profit is None:
-            self.logger.error("OCO required: stop_loss and take_profit must be provided for all orders")
+        # Platform breaker: allow disabling OANDA only, without stopping the whole system.
+        if not is_platform_enabled('oanda'):
+            return {
+                "success": False,
+                "error": "OANDA_PLATFORM_BREAKER_OFF",
+                "broker": "OANDA",
+                "environment": self.environment,
+            }
+
+        # OANDA validates price strings against instrument precision. Avoid float-string
+        # artifacts like "1.164179999999" which can trigger 400 InvalidParameterException.
+        try:
+            quote_ccy = instrument.split("_")[1] if "_" in instrument else instrument[-3:]
+        except Exception:
+            quote_ccy = ""
+        price_precision = 3 if quote_ccy == "JPY" else 5
+
+        def _fmt_price(p: float) -> str:
+            return f"{float(p):.{price_precision}f}"
+
+        # Stop-loss is mandatory; take-profit is optional (two-step SL / scale-out management).
+        if stop_loss is None:
+            self.logger.error("Stop-loss required: stop_loss must be provided for all orders")
             
             # Narration log error
             log_narration(
                 event_type="OCO_ERROR",
                 details={
-                    "error": "OCO_REQUIRED",
-                    "message": "stop_loss and take_profit must be specified",
+                    "error": "STOP_REQUIRED",
+                    "message": "stop_loss must be specified",
                     "entry_price": entry_price,
                     "units": units
                 },
@@ -254,7 +380,7 @@ class OandaConnector:
             
             return {
                 "success": False,
-                "error": "OCO_REQUIRED: stop_loss and take_profit must be specified",
+                "error": "STOP_REQUIRED: stop_loss must be specified",
                 "broker": "OANDA",
                 "environment": self.environment
             }
@@ -317,10 +443,11 @@ class OandaConnector:
             # Don't block order placement if enforcement fails
             self.logger.warning(f"Min-notional enforcement check failed: {e}")
 
-        # Enforce charter minimum expected PnL (gross) at TP
+        # NOTE: MIN_EXPECTED_PNL_USD is NOT a hard-stop by default.
+        # If you want it enforced, set ENFORCE_MIN_EXPECTED_PNL=true and ensure a TP is provided.
         try:
-            if RickCharter and hasattr(RickCharter, "MIN_EXPECTED_PNL_USD"):
-                # Use final units (after any min-notional bump). Magnitude only.
+            enforce_min_expected = os.getenv('ENFORCE_MIN_EXPECTED_PNL', 'false').lower() in ('1', 'true', 'yes')
+            if enforce_min_expected and take_profit is not None and RickCharter and hasattr(RickCharter, "MIN_EXPECTED_PNL_USD"):
                 expected_pnl_usd = abs((float(take_profit) - float(entry_price)) * float(units))
                 min_expected = float(RickCharter.MIN_EXPECTED_PNL_USD)
                 if expected_pnl_usd < min_expected:
@@ -368,61 +495,62 @@ class OandaConnector:
                 # Support both LIMIT and MARKET order types
                 if order_type.upper() == "MARKET":
                     # MARKET order - immediate execution with OCO brackets
-                    order_data = {
-                        "order": {
-                            "type": OandaOrderType.MARKET.value,
-                            "instrument": instrument,
-                            "units": str(units),
-                            "timeInForce": OandaTimeInForce.FOK.value,  # Fill or Kill
-                            "stopLossOnFill": {
-                                "price": str(stop_loss),
-                                "timeInForce": OandaTimeInForce.GTC.value
-                            },
-                            "takeProfitOnFill": {
-                                "price": str(take_profit),
-                                "timeInForce": OandaTimeInForce.GTC.value
-                            }
+                    order = {
+                        "type": OandaOrderType.MARKET.value,
+                        "instrument": instrument,
+                        "units": str(units),
+                        "timeInForce": OandaTimeInForce.FOK.value,  # Fill or Kill
+                        "stopLossOnFill": {
+                            "price": _fmt_price(stop_loss),
+                            "timeInForce": OandaTimeInForce.GTC.value
                         }
                     }
+                    if take_profit is not None:
+                        order["takeProfitOnFill"] = {
+                            "price": _fmt_price(take_profit),
+                            "timeInForce": OandaTimeInForce.GTC.value
+                        }
+                    order_data = {"order": order}
                 else:
                     # LIMIT order - wait for specific entry price with extended TTL (24h default)
-                    order_data = {
-                        "order": {
-                            "type": OandaOrderType.LIMIT.value,
-                            "instrument": instrument,
-                            "units": str(units),
-                            "price": str(entry_price),
-                            "timeInForce": OandaTimeInForce.GTD.value,
-                            "gtdTime": (datetime.now(timezone.utc) + timedelta(hours=ttl_hours)).isoformat(),
-                            "stopLossOnFill": {
-                                "price": str(stop_loss),
-                                "timeInForce": OandaTimeInForce.GTC.value
-                            },
-                            "takeProfitOnFill": {
-                                "price": str(take_profit),
-                                "timeInForce": OandaTimeInForce.GTC.value
-                            }
+                    order = {
+                        "type": OandaOrderType.LIMIT.value,
+                        "instrument": instrument,
+                        "units": str(units),
+                        "price": _fmt_price(entry_price),
+                        "timeInForce": OandaTimeInForce.GTD.value,
+                        "gtdTime": (datetime.now(timezone.utc) + timedelta(hours=ttl_hours)).isoformat(),
+                        "stopLossOnFill": {
+                            "price": _fmt_price(stop_loss),
+                            "timeInForce": OandaTimeInForce.GTC.value
                         }
                     }
-                # Micro trade gate: block trades that are micro-sized after fees
-                try:
-                    blocked, info = should_block_micro_trade(
-                        symbol=instrument,
-                        side='LONG' if units > 0 else 'SHORT',
-                        entry_price=entry_price if entry_price is not None else 0.0,
-                        stop_loss_price=stop_loss,
-                        take_profit_price=take_profit,
-                        units=units,
-                        venue='OANDA'
-                    )
-                    if blocked:
-                        try:
-                            log_narration('MICRO_TRADE_BLOCKED', info, symbol=instrument, venue='oanda')
-                        except Exception:
-                            pass
-                        return {"success": False, "error": "MICRO_TRADE_BLOCKED", "broker": "OANDA", "details": info}
-                except Exception:
-                    return {"success": False, "error": "MICRO_TRADE_GATE_ERROR", "broker": "OANDA"}
+                    if take_profit is not None:
+                        order["takeProfitOnFill"] = {
+                            "price": _fmt_price(take_profit),
+                            "timeInForce": OandaTimeInForce.GTC.value
+                        }
+                    order_data = {"order": order}
+                # Micro trade gate: only applies when a TP exists (otherwise reward is undefined)
+                if take_profit is not None:
+                    try:
+                        blocked, info = should_block_micro_trade(
+                            symbol=instrument,
+                            side='LONG' if units > 0 else 'SHORT',
+                            entry_price=entry_price if entry_price is not None else 0.0,
+                            stop_loss_price=stop_loss,
+                            take_profit_price=take_profit,
+                            units=units,
+                            venue='OANDA'
+                        )
+                        if blocked:
+                            try:
+                                log_narration('MICRO_TRADE_BLOCKED', info, symbol=instrument, venue='oanda')
+                            except Exception:
+                                pass
+                            return {"success": False, "error": "MICRO_TRADE_BLOCKED", "broker": "OANDA", "details": info}
+                    except Exception:
+                        return {"success": False, "error": "MICRO_TRADE_GATE_ERROR", "broker": "OANDA"}
                 
                 # Make LIVE API call
                 response = self._make_request("POST", f"/v3/accounts/{self.account_id}/orders", order_data)
@@ -435,7 +563,7 @@ class OandaConnector:
                     # Log successful LIVE OCO placement
                     self.logger.info(
                         f"LIVE OANDA OCO placed: {instrument} | Entry: {entry_price} | "
-                        f"SL: {stop_loss} | TP: {take_profit} | Latency: {response['latency_ms']:.1f}ms | "
+                        f"SL: {stop_loss} | TP: {take_profit if take_profit is not None else '--'} | Latency: {response['latency_ms']:.1f}ms | "
                         f"Order ID: {order_id}"
                     )
                     
@@ -525,19 +653,20 @@ class OandaConnector:
                         "type": "LIMIT",
                         "instrument": instrument,
                         "units": str(units),
-                        "price": str(entry_price),
+                        "price": _fmt_price(entry_price),
                         "timeInForce": "GTD",
                         "gtdTime": (datetime.now(timezone.utc) + timedelta(hours=ttl_hours)).isoformat(),
                         "stopLossOnFill": {
-                            "price": str(stop_loss),
-                            "timeInForce": "GTC"
-                        },
-                        "takeProfitOnFill": {
-                            "price": str(take_profit),
+                            "price": _fmt_price(stop_loss),
                             "timeInForce": "GTC"
                         }
                     }
                 }
+                if take_profit is not None:
+                    order_data["order"]["takeProfitOnFill"] = {
+                        "price": _fmt_price(take_profit),
+                        "timeInForce": "GTC"
+                    }
                 
                 # Make PRACTICE API call (real order on practice account)
                 response = self._make_request("POST", f"/v3/accounts/{self.account_id}/orders", order_data)
@@ -550,7 +679,7 @@ class OandaConnector:
                     # Log successful PRACTICE OCO placement
                     self.logger.info(
                         f"PRACTICE OANDA OCO placed (REAL API): {instrument} | Entry: {entry_price} | "
-                        f"SL: {stop_loss} | TP: {take_profit} | Latency: {response['latency_ms']:.1f}ms | "
+                        f"SL: {stop_loss} | TP: {take_profit if take_profit is not None else '--'} | Latency: {response['latency_ms']:.1f}ms | "
                         f"Order ID: {order_id}"
                     )
                     
@@ -915,6 +1044,27 @@ class OandaConnector:
             return resp
         except Exception as e:
             self.logger.error(f"Failed to set stop for trade {trade_id}: {e}")
+            return {"success": False, "error": str(e)}
+
+    def close_trade(self, trade_id: str, units: Optional[int] = None) -> Dict[str, Any]:
+        """Close an existing trade.
+
+        Args:
+            trade_id: OANDA trade id
+            units: optional number of units to close. If None, closes ALL.
+
+        Notes:
+            OANDA expects a positive units value for partial closes and "ALL" for full closes.
+        """
+        try:
+            if units is None:
+                payload = {"units": "ALL"}
+            else:
+                payload = {"units": str(abs(int(units)))}
+            endpoint = f"/v3/accounts/{self.account_id}/trades/{trade_id}/close"
+            return self._make_request("PUT", endpoint, payload)
+        except Exception as e:
+            self.logger.error(f"Failed to close trade {trade_id}: {e}")
             return {"success": False, "error": str(e)}
 
 # Convenience functions

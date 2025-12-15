@@ -1,0 +1,17 @@
+{
+  "coinbase": {
+    "enabled": true,
+    "reason": "smoke_test_reset",
+    "updated_utc": "2025-12-15T04:13:58Z"
+  },
+  "ibkr": {
+    "enabled": true,
+    "reason": "smoke",
+    "updated_utc": "2025-12-15T08:33:00Z"
+  },
+  "oanda": {
+    "enabled": true,
+    "reason": "smoke_test_reset",
+    "updated_utc": "2025-12-15T04:13:58Z"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "last_updated": "2025-11-25T15:29:08.200147+00:00",
+  "session_stats": {
+    "session_start": "2025-11-25T15:27:21.560852+00:00",
+    "total_trades": 0,
+    "winning_trades": 0,
+    "losing_trades": 0,
+    "gross_pnl": 0.0,
+    "net_pnl": 0.0,
+    "max_drawdown": 0.0,
+    "current_drawdown": 0,
+    "win_rate": 0.0,
+    "risk_score": 30.0
+  },
+  "breaker_status": {
+    "is_active": false,
+    "consecutive_triggers": 0,
+    "last_check": "2025-11-25T15:29:08.200164+00:00"
+  }
+}

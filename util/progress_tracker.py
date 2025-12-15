@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Immutable Progress Tracker - RICK_LIVE_CLEAN
+Immutable Progress Tracker - RICK_PHOENIX
 Automatically updates README.md with breadcrumb trail of completed work
 PIN: 841921 | Auto-generated progress documentation
 """
@@ -17,7 +17,7 @@ class ProgressTracker:
     Maintains complete audit trail of all system changes
     """
     
-    def __init__(self, root_dir: str = None):
+    def __init__(self, root_dir: Optional[str] = None):
         self.root_dir = Path(root_dir or os.getcwd())
         self.progress_file = self.root_dir / "PROGRESS_LOG.json"
         self.readme_file = self.root_dir / "README.md"
@@ -117,7 +117,7 @@ class ProgressTracker:
         active_files = self.progress_data["active_files"]
         constants = self.progress_data["system_constants"]
         
-        readme_content = f"""# RICK_LIVE_CLEAN - Live Trading System
+        readme_content = f"""# RICK_PHOENIX - Trading System
 ## PIN: {constants['PIN']} | Last Updated: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')}
 
 ---
@@ -249,7 +249,7 @@ LIVE    → OANDA: live,     Coinbase: live     (requires PIN: 841921)
 ## 📁 File Organization
 
 ```
-RICK_LIVE_CLEAN/
+RICK_PHOENIX/
 ├── brokers/                    # Trading connectors
 │   ├── oanda_connector.py      # OANDA FX (ACTIVE)
 │   └── coinbase_connector.py   # Coinbase crypto (ACTIVE)

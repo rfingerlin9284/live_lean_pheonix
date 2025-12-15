@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Momentum Detection & Smart Trailing System
-Extracted from: /home/ing/RICK/RICK_LIVE_CLEAN/rbotzilla_golden_age.py
+Extracted from: legacy rbotzilla_golden_age.py snapshot (path redacted)
 Original Author: RBOTZILLA System
 Integration Date: 2025-10-15
 PIN: 841921

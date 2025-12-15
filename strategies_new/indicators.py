@@ -1,1 +1,0 @@
-print('indicators new file')

@@ -4,7 +4,7 @@ RICK Charter Enforcement Module - RBOTzilla UNI Phase 2
 Immutable trading constants and enforcement logic.
 PIN: 841921 | Generated: 2025-09-26
 
-EXTRACTED FROM: WSL Ubuntu /home/ing/RICK/RICK_LIVE_CLEAN
+EXTRACTED FROM: legacy snapshot (path redacted)
 READ ONLY ACCESS - No modifications to source
 """
 
@@ -25,6 +25,9 @@ class RejectedTimeFrame(Enum):
     M5 = "M5"
 
 class RickCharter:
+    # Compatibility for guardian gates and legacy code
+    MAX_MARGIN_UTILIZATION_PCT = 0.35
+    CRYPTO_AI_HIVE_VOTE_CONSENSUS = 0.90
     """
     RICK Charter Core Enforcement - Immutable Constants
     All values are hardcoded for safety and cannot be overridden.

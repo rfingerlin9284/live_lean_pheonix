@@ -23,7 +23,7 @@ def explain_for(engine: OandaTradingEngine, symbol: str):
     try:
         candles = engine.oanda.get_historical_data(symbol, count=120, granularity='M15')
         from systems.momentum_signals import generate_signal
-        sig, conf = generate_signal(symbol, candles)
+        sig, conf, meta = generate_signal(symbol, candles)
         if not sig:
             print(symbol, "No trading signal currently available")
             return

@@ -1,0 +1,67 @@
+# Strategy and Session Toggles for RICK_PHOENIX
+
+profiles:
+  safe:
+    enable_oanda_live_entries: false
+    max_concurrent_positions: 2
+    risk_per_trade_pct: 0.25
+  balanced:
+    enable_oanda_live_entries: true
+    max_concurrent_positions: 3
+    risk_per_trade_pct: 0.5
+  aggressive:
+    enable_oanda_live_entries: true
+    max_concurrent_positions: 4
+    risk_per_trade_pct: 1.0
+
+active_profile: aggressive
+
+oanda:
+  enable_wolfpack_ema_trend: true
+  enable_quant_hedge_rules: true
+  enable_strategic_flip_hedge: false   # OFF by default
+  enable_session_scheduler: true
+  enable_fvg_breakout_entries: true
+  enable_mean_reversion: false
+
+coinbase:
+  enable_spot_trend: true
+  enable_perp_breakout: true
+  enable_scalp_mode: false
+  enable_session_scheduler: true
+  enable_fvg_breakout_entries: true
+
+ibkr:
+  enable_equities_trend: true
+  enable_mean_reversion: false
+  enable_session_scheduler: true
+
+sessions:
+  oanda:
+    asia:
+      active: true
+      strategies: ["wolfpack_ema_trend", "mean_reversion"]
+    london:
+      active: true
+      strategies: ["wolfpack_ema_trend", "fvg_breakout"]
+    new_york:
+      active: true
+      strategies: ["wolfpack_ema_trend", "quant_hedge"]
+    off_hours:
+      active: false
+      strategies: ["wolfpack_ema_trend"]
+  coinbase:
+    us_morning:
+      active: true
+      strategies: ["perp_breakout", "spot_trend"]
+    us_evening:
+      active: false
+      strategies: []
+
+  ibkr:
+    regular_hours:
+      active: true
+      strategies: ["equities_trend"]
+    after_hours:
+      active: false
+      strategies: []

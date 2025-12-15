@@ -1,1 +1,0 @@
-# Placeholder for extracted content from CRYPTO_FUTURES_ANALYSIS.md

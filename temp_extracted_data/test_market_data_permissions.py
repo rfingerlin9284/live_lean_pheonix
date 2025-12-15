@@ -1,1 +1,0 @@
-# Placeholder for extracted content from test_market_data_permissions.py

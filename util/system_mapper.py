@@ -31,8 +31,8 @@ class SystemNode:
         self.connections_out: List[str] = []
         self.connections_in: List[str] = []
         self.status = 'unknown'
-        self.last_check = None
-        self.metadata = {}
+        self.last_check: Optional[str] = None
+        self.metadata: Dict[str, Any] = {}
     
     def to_dict(self) -> Dict:
         return {
@@ -76,7 +76,7 @@ class SystemMapper:
             f.write(log_entry)
         print(log_entry.strip())
     
-    def add_node(self, name: str, node_type: str, layer: str, metadata: Dict = None) -> SystemNode:
+    def add_node(self, name: str, node_type: str, layer: str, metadata: Optional[Dict[str, Any]] = None) -> SystemNode:
         """Add a node to the system map"""
         if name in self.nodes:
             self.log(f"Node already exists: {name}", 'DEBUG')
@@ -356,10 +356,14 @@ class SystemMapper:
         self.log(f"System diagram saved to: {self.diagram_file}")
 
 
-def build_rick_system_map(root_dir: str = '/home/ing/RICK/RICK_LIVE_CLEAN') -> SystemMapper:
+def build_rick_system_map(root_dir: Optional[str] = None) -> SystemMapper:
     """
     Build the complete RICK trading system map with all nodes and connections.
     """
+    if root_dir is None:
+        # Default to the repository root (parent of util/)
+        root_dir = str(Path(__file__).resolve().parents[1])
+
     mapper = SystemMapper(root_dir)
     
     # ===== FRONTEND LAYER =====

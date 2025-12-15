@@ -1,0 +1,3 @@
+[2025-11-24T21:59:52-05:00] Watchdog: checking run_autonomous.py...
+[2025-11-24T21:59:52-05:00] Watchdog: run_autonomous.py not running; starting via safe wrapper
+[2025-11-24T21:59:52-05:00] Watchdog: start request issued
