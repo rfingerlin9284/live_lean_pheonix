@@ -1,0 +1,3 @@
+max_positions: 1
+risk_per_trade_pct: 1.0
+symbols: [BTC-USD, ETH-USD]

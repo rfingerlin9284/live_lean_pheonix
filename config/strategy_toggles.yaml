@@ -13,6 +13,25 @@ profiles:
     enable_oanda_live_entries: true
     max_concurrent_positions: 4
     risk_per_trade_pct: 1.0
+    min_rr_ratio: 3.2
+    micro_trading_mode: true
+    two_step_sl: true
+    tight_trailing: true
+    sessions:
+      asia:
+        wolfpack_ema_trend: true
+        fvg_breakout: true
+      london:
+        wolfpack_ema_trend: true
+        fvg_breakout: true
+        quant_hedge: true
+      new_york:
+        wolfpack_ema_trend: true
+        quant_hedge: true
+      off_hours:
+        wolfpack_ema_trend: true
+        fvg_breakout: true
+        quant_hedge: true
 
 active_profile: aggressive
 

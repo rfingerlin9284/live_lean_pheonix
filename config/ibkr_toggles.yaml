@@ -1,0 +1,3 @@
+max_positions: 2
+risk_per_trade_pct: 1.0
+symbols: [AAPL, MSFT, SPY]

@@ -104,6 +104,23 @@ class OandaTradingEngine:
         self._announce()
         self._apply_selectivity_from_toggles()
         self._check_auth_guard()
+        # Log active profile from config/strategy_toggles.yaml
+        try:
+            import yaml
+            with open('config/strategy_toggles.yaml', 'r') as f:
+                toggles = yaml.safe_load(f)
+            active_profile = toggles.get('active_profile', 'balanced')
+            log_narration(
+                event_type="PROFILE_STATUS",
+                details={
+                    "active_profile": active_profile,
+                    "description": f"Profile '{active_profile}' loaded from config/strategy_toggles.yaml"
+                },
+                symbol='SYSTEM',
+                venue='oanda'
+            )
+        except Exception as e:
+            logger.warning(f"Could not log active profile: {e}")
 
     def _apply_selectivity_from_toggles(self) -> None:
         """Apply selectivity knobs (confidence gate) from toggles.
