@@ -16,5 +16,8 @@ source .env 2>/dev/null || true
 # Default to practice unless overridden
 export RICK_ENV="${RICK_ENV:-practice}"
 
+# Default toggles path to workspace config unless overridden
+export PHX_TOGGLES_PATH="${PHX_TOGGLES_PATH:-${TOGGLES_PATH:-config/toggles.json}}"
+
 # Start canonical engine
 exec python3 -u oanda/oanda_trading_engine.py

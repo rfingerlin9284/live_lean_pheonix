@@ -83,6 +83,14 @@ if [[ "$HAS_JQ" == "true" ]]; then
           ("AGGRESSIVE LEV: " + ($e.details.leverage | tostring) + "x " + ($e.details.symbol // "") + " units:" + (($e.details.units // "") | tostring) + " " + (($e.details.explanation // "") | tostring))
         elif ($e.event_type == "AUTONOMOUS_STARTUP" or $e.event_type == "CANARY_INIT" or $e.event_type == "CANARY_SESSION_START") then
           ("DETAILS: " + ($e.details | tostring))
+        elif ($e.event_type == "ENTRY_CANDIDATE") then
+          ("CANDIDATE " + ($e.details.direction // "") + " conf=" + (($e.details.confidence // 0) | tostring) + " confl=" + (($e.details.confluence // 0) | tostring))
+        elif ($e.event_type == "ENTRY_ACCEPTED") then
+          ("ACCEPTED " + ($e.details.direction // "") + " bucket=" + ($e.details.bucket // "") + " conf=" + (($e.details.confidence // 0) | tostring) + " confl=" + (($e.details.confluence // 0) | tostring))
+        elif ($e.event_type == "ENTRY_REJECTED") then
+          ("REJECTED " + ($e.details.reason_code // "") + ": " + (($e.details.explanation // "") | tostring) + " (bucket=" + (($e.details.bucket // "") | tostring) + ")")
+        elif ($e.event_type == "ENTRY_VOL_GATED") then
+          ("REJECTED vol_gate: ADR " + (($e.details.adr_pips // "?") | tostring) + " > cap " + (($e.details.adr_cap_pips // "?") | tostring))
         else
           ($e.details | tostring)
         end)

@@ -30,6 +30,30 @@ from util.alert_notifier import send_system_alert
 from core.momentum_signals import generate_signal
 # ----------------------------------------------------------------------------------------
 
+# Optional correlation gate (currency bucket anti-duplication)
+try:
+    from foundation.margin_correlation_gate import MarginCorrelationGate, Position as GatePosition, Order as GateOrder
+except Exception:
+    MarginCorrelationGate = None
+    GatePosition = None
+    GateOrder = None
+
+# Additive advanced modules (safe defaults: disabled / classic)
+try:
+    from systems.signal_fusion import fuse as fuse_signal
+except Exception:
+    fuse_signal = None
+
+try:
+    from util.aggressive_plan import compute_units as compute_aggr_units
+except Exception:
+    compute_aggr_units = None
+
+try:
+    from execution.exit_edge_hybrid import apply as apply_edge_exit
+except Exception:
+    apply_edge_exit = None
+
 import random
 
 logging.basicConfig(level=logging.INFO)
@@ -77,10 +101,74 @@ class OandaTradingEngine:
                 {"pips": 8, "fraction": 0.33},
                 {"pips": 16, "fraction": 0.33},
             ],
+
+            # --- Advanced (additive) knobs ---
+            # Exit manager mode:
+            # - classic: existing BE + tight trail (+ optional scale-out)
+            # - edge_hybrid: ACD (BE/locks) + Chandelier (ATR) with classic fallback
+            "exit_mode": "classic",
+            "edge_exit_enabled": True,
+
+            # ACD stages (pips)
+            "acd_be_pips": 6,
+            "acd_partial_pips": 12,
+            "acd_full_pips": 24,
+            "acd_partial_lock_pips": 4,
+            "acd_full_lock_pips": 2,
+
+            # Chandelier (ATR)
+            "chandelier_atr_period": 14,
+            "chandelier_atr_mult": 2.2,
+
+            # Volatility sanity
+            "vol_adr_lookback": 14,
+            "vol_adr_cap_pips": 400,
+
+            # Aggressive sizing (PIN-gated) — default OFF
+            "aggressive_enabled": False,
+            "base_leverage": 1.5,
+            "leverage_max": 3.0,
+            "leverage_aggressiveness": 1.0,
+
+            # --- Decision narration (plain-English reasons) ---
+            "decision_narration_enabled": True,
+            "terminal_decision_narration": True,
+            "terminal_decision_rate_limit_sec": 20,
+            "terminal_narrate_no_signal": False,
+
+            # --- Portfolio posture ---
+            # Split the available slots into 2 buckets:
+            # - GEM: higher threshold, intended for longer holds
+            # - SCALP: faster turnover
+            "slot_split_enabled": True,
+            "gem_slots": 3,
+            "scalp_slots": 9,
+            "gem_min_confidence": 0.78,
+            "gem_min_confluence": 0.65,
+            "scalp_min_confidence": None,
+            "scalp_min_confluence": 0.0,
+
+            # --- Anti-duplication / correlation ---
+            # Currency bucket correlation gate: blocks entries that increase existing same-direction exposure.
+            "correlation_gate_enabled": True,
+
+            # Optional runtime pair universe override
+            # Example: ["EUR_USD","GBP_USD","AUD_USD","NZD_USD","USD_JPY","USD_CHF","USD_CAD",...]
+            "trading_pairs": None,
         }
         self.toggles = self._load_toggles()
         self._auth_reported_ok = False
         self._auth_reported_fail = False
+
+        # Latest entry confluence (used by aggressive sizing if enabled)
+        self._last_confluence = 0.0
+
+        # Decision narration / slot tagging
+        self._decision_last_ts: Dict[str, float] = {}
+        self._position_bucket_by_symbol: Dict[str, str] = {}
+
+        # Optional correlation gate instance (lazy)
+        self._corr_gate = None
 
         # Safety constants (MIN_CONFIDENCE is configurable via toggles)
         self.MIN_CONFIDENCE = 0.55
@@ -103,6 +191,7 @@ class OandaTradingEngine:
 
         self._announce()
         self._apply_selectivity_from_toggles()
+        self._apply_pairs_from_toggles()
         self._check_auth_guard()
         # Log active profile from config/strategy_toggles.yaml
         try:
@@ -145,6 +234,25 @@ class OandaTradingEngine:
             min_conf = by_venue.get('oanda', min_conf)
         self.MIN_CONFIDENCE = _clamp01(min_conf)
 
+    def _apply_pairs_from_toggles(self) -> None:
+        """Optionally override trading universe from toggles.
+
+        This does not affect risk/OCO logic; it only changes which instruments are scanned.
+        """
+        pairs = self.toggles.get('trading_pairs')
+        if not isinstance(pairs, list) or not pairs:
+            return
+        cleaned: List[str] = []
+        for p in pairs:
+            if not isinstance(p, str):
+                continue
+            p = p.strip().upper().replace('/', '_')
+            if '_' not in p:
+                continue
+            cleaned.append(p)
+        if cleaned:
+            self.TRADING_PAIRS = cleaned
+
     def _passes_selectivity(self, confidence: float) -> bool:
         try:
             return float(confidence) >= float(self.MIN_CONFIDENCE)
@@ -159,6 +267,62 @@ class OandaTradingEngine:
             except Exception as e:
                 logger.warning(f"Failed to load toggles from {path}: {e}")
         return self.default_toggles.copy()
+
+    def _should_emit_decision(self, symbol: str, key: str) -> bool:
+        """Rate-limit terminal decision narration to avoid flooding."""
+        try:
+            import time
+            now = time.time()
+        except Exception:
+            return True
+        rate = self.toggles.get('terminal_decision_rate_limit_sec', 20)
+        try:
+            rate = float(rate)
+        except Exception:
+            rate = 20.0
+        if rate <= 0:
+            return True
+        k = f"{symbol}:{key}"
+        last = self._decision_last_ts.get(k, 0.0)
+        if (now - last) >= rate:
+            self._decision_last_ts[k] = now
+            return True
+        return False
+
+    def _decision_say(self, symbol: str, message: str, key: str = 'decision', warn: bool = False) -> None:
+        if not self.toggles.get('terminal_decision_narration', True):
+            return
+        if not self._should_emit_decision(symbol, key):
+            return
+        try:
+            if warn:
+                self.display.warning(f"{symbol}: {message}")
+            else:
+                self.display.rick_says(f"{symbol}: {message}")
+        except Exception:
+            pass
+
+    def _narrate(self, event_type: str, symbol: str, details: dict) -> None:
+        if not self.toggles.get('decision_narration_enabled', True):
+            return
+        try:
+            log_narration(event_type=event_type, details=details, symbol=symbol, venue='oanda')
+        except Exception:
+            pass
+
+    def _count_bucket_slots(self, trades: List[dict]) -> Dict[str, int]:
+        gem = 0
+        scalp = 0
+        for t in trades:
+            sym = (t.get('instrument') or t.get('symbol') or '').upper()
+            if not sym:
+                continue
+            b = (self._position_bucket_by_symbol.get(sym) or 'SCALP').upper()
+            if b == 'GEM':
+                gem += 1
+            else:
+                scalp += 1
+        return {'gem': gem, 'scalp': scalp}
 
     def _check_auth_guard(self):
         ok, msg = self.oanda.check_authorization()
@@ -218,6 +382,7 @@ class OandaTradingEngine:
             try:
                 self.toggles = self._load_toggles()
                 self._apply_selectivity_from_toggles()
+                self._apply_pairs_from_toggles()
                 self._check_auth_guard()
                 trades = self.oanda.get_trades() or []
                 self.active_positions = {t['id']: t for t in trades}
@@ -228,20 +393,174 @@ class OandaTradingEngine:
 
                 # Place new trades if capacity allows
                 if len(self.active_positions) < self.MAX_POSITIONS:
+                    bucket_counts = self._count_bucket_slots(trades)
+                    gem_slots = int(self.toggles.get('gem_slots', 3) or 0)
+                    scalp_slots = int(self.toggles.get('scalp_slots', max(self.MAX_POSITIONS - gem_slots, 0)) or 0)
+                    gem_min_conf = float(self.toggles.get('gem_min_confidence', 0.78) or 0.78)
+                    gem_min_confl = float(self.toggles.get('gem_min_confluence', 0.65) or 0.0)
+                    scalp_min_conf = self.toggles.get('scalp_min_confidence', None)
+                    scalp_min_conf = float(scalp_min_conf) if scalp_min_conf is not None else float(self.MIN_CONFIDENCE)
+                    scalp_min_confl = float(self.toggles.get('scalp_min_confluence', 0.0) or 0.0)
+
                     for symbol in self.TRADING_PAIRS:
                         if any((t.get('instrument') or t.get('symbol')) == symbol for t in trades):
+                            # Optional: explain skips for duplicates
+                            if self.toggles.get('terminal_decision_narration', True) and self._should_emit_decision(symbol, 'already_open'):
+                                self._decision_say(symbol, 'skip — already in position', key='already_open')
                             continue
                         candles = self.oanda.get_historical_data(symbol, count=100, granularity='M15')
-                        result = generate_signal(symbol, candles)
-                        # Handle both 2-tuple and 3-tuple returns
-                        if isinstance(result, tuple):
-                            sig = result[0]
-                            conf = result[1] if len(result) > 1 else 0.0
+                        sig = None
+                        conf = 0.0
+                        confluence = 0.0
+                        meta = {}
+
+                        if fuse_signal is not None:
+                            try:
+                                sig, conf, confluence, meta = fuse_signal(symbol, candles, toggles=self.toggles)
+                            except Exception:
+                                sig, conf, confluence, meta = None, 0.0, 0.0, {}
                         else:
-                            sig, conf = result, 0.0
-                        if sig and self._passes_selectivity(conf):
-                            await self._open_trade(symbol, sig, conf)
-                            await asyncio.sleep(1)
+                            result = generate_signal(symbol, candles)
+                            # Handle both 2-tuple and 3-tuple returns
+                            if isinstance(result, tuple):
+                                sig = result[0]
+                                conf = result[1] if len(result) > 1 else 0.0
+                                meta = result[2] if len(result) > 2 and isinstance(result[2], dict) else {}
+                            else:
+                                sig, conf = result, 0.0
+
+                        # If fusion gated volatility, narrate and skip
+                        try:
+                            if isinstance(meta, dict) and meta.get('vol_gate'):
+                                log_narration(
+                                    event_type='ENTRY_VOL_GATED',
+                                    details={
+                                        'symbol': symbol,
+                                        'adr_pips': meta.get('adr_pips'),
+                                        'adr_cap_pips': meta.get('adr_cap_pips'),
+                                    },
+                                    symbol=symbol,
+                                    venue='oanda'
+                                )
+                                self._decision_say(symbol, f"rejected — volatility gate (ADR {meta.get('adr_pips')}p > cap {meta.get('adr_cap_pips')}p)", key='vol_gate', warn=True)
+                                continue
+                        except Exception:
+                            pass
+
+                        if not sig:
+                            if self.toggles.get('terminal_narrate_no_signal', False):
+                                self._decision_say(symbol, 'no signal this scan', key='no_signal')
+                            continue
+
+                        # Candidate exists: explain what we saw
+                        self._narrate(
+                            event_type='ENTRY_CANDIDATE',
+                            symbol=symbol,
+                            details={
+                                'direction': sig,
+                                'confidence': float(conf or 0.0),
+                                'confluence': float(confluence or 0.0),
+                                'meta': meta or {},
+                                'min_confidence': float(self.MIN_CONFIDENCE),
+                            },
+                        )
+
+                        # Confidence/selectivity gate
+                        if not self._passes_selectivity(conf):
+                            reason = f"confidence {float(conf or 0.0):.2f} < min {float(self.MIN_CONFIDENCE):.2f}"
+                            self._narrate('ENTRY_REJECTED', symbol, {
+                                'reason_code': 'confidence_below_min',
+                                'explanation': reason,
+                                'direction': sig,
+                                'confidence': float(conf or 0.0),
+                                'min_confidence': float(self.MIN_CONFIDENCE),
+                            })
+                            self._decision_say(symbol, f"rejected — {reason}", key='conf_min', warn=True)
+                            continue
+
+                        # Slot split: GEM vs SCALP
+                        bucket = 'SCALP'
+                        if bool(self.toggles.get('slot_split_enabled', True)):
+                            # Prefer GEM only if it clears higher bar and GEM slots remain
+                            if float(conf or 0.0) >= gem_min_conf and float(confluence or 0.0) >= gem_min_confl and bucket_counts['gem'] < gem_slots:
+                                bucket = 'GEM'
+                            else:
+                                # Otherwise it must fit SCALP constraints
+                                if bucket_counts['scalp'] >= scalp_slots:
+                                    reason = f"scalp slots full ({bucket_counts['scalp']}/{scalp_slots})"
+                                    self._narrate('ENTRY_REJECTED', symbol, {
+                                        'reason_code': 'scalp_slots_full',
+                                        'explanation': reason,
+                                        'direction': sig,
+                                        'confidence': float(conf or 0.0),
+                                        'confluence': float(confluence or 0.0),
+                                        'bucket_counts': bucket_counts,
+                                    })
+                                    self._decision_say(symbol, f"rejected — {reason}", key='slots_full', warn=True)
+                                    continue
+                                if float(conf or 0.0) < scalp_min_conf:
+                                    reason = f"scalp conf {float(conf or 0.0):.2f} < {float(scalp_min_conf):.2f}"
+                                    self._narrate('ENTRY_REJECTED', symbol, {
+                                        'reason_code': 'scalp_conf_below_min',
+                                        'explanation': reason,
+                                        'direction': sig,
+                                        'confidence': float(conf or 0.0),
+                                        'scalp_min_confidence': float(scalp_min_conf),
+                                    })
+                                    self._decision_say(symbol, f"rejected — {reason}", key='scalp_conf', warn=True)
+                                    continue
+                                if float(confluence or 0.0) < scalp_min_confl:
+                                    reason = f"scalp confluence {float(confluence or 0.0):.2f} < {float(scalp_min_confl):.2f}"
+                                    self._narrate('ENTRY_REJECTED', symbol, {
+                                        'reason_code': 'scalp_confluence_below_min',
+                                        'explanation': reason,
+                                        'direction': sig,
+                                        'confluence': float(confluence or 0.0),
+                                        'scalp_min_confluence': float(scalp_min_confl),
+                                    })
+                                    self._decision_say(symbol, f"rejected — {reason}", key='scalp_confl', warn=True)
+                                    continue
+                        else:
+                            bucket = 'OPEN'
+
+                        # Capacity guard
+                        if len(self.active_positions) >= self.MAX_POSITIONS:
+                            reason = f"max positions reached ({len(self.active_positions)}/{self.MAX_POSITIONS})"
+                            self._narrate('ENTRY_REJECTED', symbol, {
+                                'reason_code': 'max_positions',
+                                'explanation': reason,
+                                'direction': sig,
+                            })
+                            self._decision_say(symbol, f"rejected — {reason}", key='max_pos', warn=True)
+                            continue
+
+                        # Approved by selection gates (correlation gate happens at order-time once we know units)
+                        self._narrate('ENTRY_ACCEPTED', symbol, {
+                            'direction': sig,
+                            'confidence': float(conf or 0.0),
+                            'confluence': float(confluence or 0.0),
+                            'bucket': bucket,
+                            'bucket_counts': bucket_counts,
+                        })
+                        self._decision_say(symbol, f"accepted — {sig} (bucket={bucket}, conf={float(conf or 0.0):.2f}, confl={float(confluence or 0.0):.2f})", key='accepted')
+
+                        self._last_confluence = float(confluence or 0.0)
+                        ok, why = await self._open_trade(
+                            symbol,
+                            sig,
+                            conf,
+                            confluence=float(confluence or 0.0),
+                            fusion_meta=meta,
+                            bucket=bucket,
+                        )
+                        if ok:
+                            # Update local bucket tag for counting/reserving
+                            self._position_bucket_by_symbol[symbol] = bucket
+                            bucket_counts = self._count_bucket_slots(trades)
+                        else:
+                            if why:
+                                self._decision_say(symbol, f"blocked at order-time — {why}", key='order_blocked', warn=True)
+                        await asyncio.sleep(1)
 
                 # Manage open trades
                 for trade in trades:
@@ -258,20 +577,20 @@ class OandaTradingEngine:
                 except Exception:
                     pass
 
-    async def _open_trade(self, symbol: str, direction: str, confidence: float):
+    async def _open_trade(self, symbol: str, direction: str, confidence: float, confluence: float = 0.0, fusion_meta: Optional[dict] = None, bucket: str = 'SCALP'):
         prices = self.oanda.get_live_prices([symbol])
         if not prices or symbol not in prices:
-            return
+            return False, 'missing_price'
         snap = prices[symbol]
         bid = snap.get('bid')
         ask = snap.get('ask')
         entry = ask if direction == 'BUY' else bid
         if entry is None:
-            return
+            return False, 'missing_entry'
         try:
             entry = float(entry)
         except Exception:
-            return
+            return False, 'bad_entry'
 
         pip = 0.01 if 'JPY' in symbol else 0.0001
         sl = entry - (self.STOP_LOSS_PIPS * pip) if direction == 'BUY' else entry + (self.STOP_LOSS_PIPS * pip)
@@ -288,13 +607,85 @@ class OandaTradingEngine:
         min_notional = getattr(RickCharter, 'MIN_NOTIONAL_USD', 15000)
         if symbol.startswith('USD'):
             # USD is base (USD_JPY, USD_CAD, etc.) - each unit = $1
-            units = int(min_notional * 1.05)
+            units_abs = int(min_notional * 1.05)
         else:
             # USD is quote (EUR_USD, AUD_USD, etc.) - each unit = entry price in USD
-            units = int((min_notional * 1.05) / max(entry, 1e-9))
+            units_abs = int((min_notional * 1.05) / max(entry, 1e-9))
+
         # Round up to nearest 100 for cleaner sizing
-        units = ((units // 100) + 1) * 100
-        units = units if direction == 'BUY' else -units
+        units_abs = max(1, ((units_abs // 100) + 1) * 100)
+
+        # Optional aggressive plan (PIN-gated) — default OFF
+        sizing_meta = None
+        if compute_aggr_units is not None:
+            try:
+                units_signed, sizing_meta = compute_aggr_units(
+                    pin=841921,
+                    price=float(entry),
+                    side=direction,
+                    base_units_at_1x=int(units_abs),
+                    toggles={**self.toggles, "entry_confluence": float(confluence or 0.0)},
+                )
+                # Keep it clean: nearest 100, but never below 1
+                units_abs = max(1, int(abs(units_signed)))
+                units_abs = max(1, (units_abs // 100) * 100) or 100
+            except Exception:
+                sizing_meta = None
+
+        units = units_abs if direction == 'BUY' else -units_abs
+
+        # Correlation/anti-duplication gate (currency bucket) — blocks entries that stack same-direction exposure.
+        if bool(self.toggles.get('correlation_gate_enabled', True)) and MarginCorrelationGate is not None and GatePosition is not None and GateOrder is not None:
+            try:
+                if self._corr_gate is None:
+                    # NAV only affects margin checks; correlation check works regardless.
+                    nav = float(self.toggles.get('account_nav_usd', 1970.0) or 1970.0)
+                    self._corr_gate = MarginCorrelationGate(account_nav=nav)
+
+                positions = []
+                for t in (self.active_positions or {}).values():
+                    sym = (t.get('instrument') or t.get('symbol') or '').upper()
+                    if not sym:
+                        continue
+                    u = float(t.get('currentUnits', t.get('units', 0)) or 0)
+                    side = 'LONG' if u > 0 else 'SHORT'
+                    ep = float(t.get('price') or t.get('entryPrice') or 0.0)
+                    positions.append(
+                        GatePosition(
+                            symbol=sym,
+                            side=side,
+                            units=abs(u),
+                            entry_price=ep,
+                            current_price=ep,
+                            pnl=0.0,
+                            pnl_pips=0.0,
+                            margin_used=0.0,
+                            position_id=str(t.get('id') or ''),
+                        )
+                    )
+
+                new_order = GateOrder(
+                    symbol=symbol,
+                    side=direction,
+                    units=float(abs(units_abs)),
+                    price=float(entry),
+                    order_id='PENDING',
+                    order_type='MARKET',
+                )
+
+                corr = self._corr_gate.correlation_gate_any_ccy(new_order=new_order, current_positions=positions)
+                if not getattr(corr, 'allowed', True):
+                    reason = getattr(corr, 'reason', 'correlation_gate_blocked')
+                    self._narrate('ENTRY_REJECTED', symbol, {
+                        'reason_code': 'correlation_gate',
+                        'explanation': reason,
+                        'direction': direction,
+                        'bucket': bucket,
+                    })
+                    return False, reason
+            except Exception:
+                # Never fail open order placement due to gate errors; only enforce when it runs cleanly.
+                pass
         base_ccy, quote_ccy = (symbol.split('_', 1) + [''])[:2]
         if quote_ccy == 'USD':
             risk_usd = abs(entry - sl) * abs(units)
@@ -314,6 +705,24 @@ class OandaTradingEngine:
         tp_text = f"TP: {tp:.5f} (+${reward_usd:.2f})" if tp is not None else "TP: -- (disabled)"
         self.display.info('Placing', f"{symbol} {direction} | SL: {sl:.5f} (-${risk_usd:.2f}) | {tp_text}")
         log_narration(event_type='TRADE_SIGNAL', details={'symbol': symbol, 'direction': direction, 'confidence': confidence})
+
+        # Optional narration: show confluence + sizing mode
+        try:
+            log_narration(
+                event_type='ENTRY_CONFLUENCE',
+                details={
+                    'symbol': symbol,
+                    'confidence': float(confidence or 0.0),
+                    'confluence': float(confluence or 0.0),
+                    'fusion_meta': fusion_meta or {},
+                    'sizing': sizing_meta,
+                    'bucket': bucket,
+                },
+                symbol=symbol,
+                venue='oanda'
+            )
+        except Exception:
+            pass
 
         # Two-step method: TP is optional; we manage exits via break-even + tight trailing + optional scale-out.
         result = self.oanda.place_oco_order(symbol, entry, sl, tp, units)
@@ -338,10 +747,19 @@ class OandaTradingEngine:
                     'stop_loss_usd': round(risk_usd, 2),
                     'take_profit_usd': round(reward_usd, 2),
                     'notional_usd': round(notional_usd, 2) if isinstance(notional_usd, (int, float)) else None,
+                    'bucket': bucket,
                 }
             )
+            return True, None
         else:
             self.display.error('Order failed: ' + str(result.get('error')))
+            self._narrate('ENTRY_REJECTED', symbol, {
+                'reason_code': 'broker_rejected',
+                'explanation': str(result.get('error')),
+                'direction': direction,
+                'bucket': bucket,
+            })
+            return False, str(result.get('error'))
 
     async def _manage_trade(self, trade):
         try:
@@ -362,6 +780,50 @@ class OandaTradingEngine:
             curr = float(curr)
             pip = 0.01 if 'JPY' in symbol else 0.0001
             profit_pips = (curr - entry) / pip if is_long else (entry - curr) / pip
+
+            # Edge exits (ACD -> Chandelier) are additive and toggleable.
+            # If enabled, we apply it first; classic BE/trailing remains as fallback.
+            exit_mode = str(self.toggles.get('exit_mode', 'classic') or 'classic').lower()
+            if apply_edge_exit is not None and exit_mode in ('edge_hybrid', 'edge', 'hybrid'):
+                try:
+                    recent = None
+                    # Only pull candles if we are in/near profit to reduce API load.
+                    if profit_pips > 0:
+                        recent = self.oanda.get_historical_data(symbol, count=60, granularity='M15')
+                    decision = apply_edge_exit(trade=trade, price_snap=snap, toggles=self.toggles, recent_candles=recent)
+                    if isinstance(decision, dict) and decision.get('action') == 'MOVE_SL' and decision.get('new_sl') is not None:
+                        try:
+                            new_sl_raw = decision.get('new_sl')
+                            if new_sl_raw is None:
+                                return
+                            new_sl = float(new_sl_raw)
+                        except Exception:
+                            return
+                        # Never loosen stop
+                        if current_sl is None or (is_long and new_sl > current_sl) or ((not is_long) and new_sl < current_sl):
+                            self.display.info('SL update', f"{symbol}: {current_sl if current_sl is not None else 0:.5f} -> {new_sl:.5f} ({decision.get('reason','EDGE')})")
+                            self.oanda.set_trade_stop(trade.get('id'), new_sl)
+                            current_sl = new_sl
+                            try:
+                                log_narration(
+                                    event_type='EXIT_EDGE_SL_MOVED',
+                                    details={
+                                        'trade_id': trade_id,
+                                        'symbol': symbol,
+                                        'reason': decision.get('reason'),
+                                        'new_sl': new_sl,
+                                        'profit_pips': round(float(profit_pips), 2),
+                                        'meta': decision.get('meta', {}),
+                                    },
+                                    symbol=symbol,
+                                    venue='oanda'
+                                )
+                            except Exception:
+                                pass
+                            # If edge module moved SL, skip further classic changes this loop.
+                            return
+                except Exception:
+                    pass
 
             # Optional scale-out (incremental partial closes)
             try:

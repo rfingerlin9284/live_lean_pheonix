@@ -20,9 +20,23 @@
         }
     },
     {
+        "label": "oandastart",
+        "type": "shell",
+        "command": "bash -lc \"RICK_ENV=practice PHX_TOGGLES_PATH=${workspaceFolder}/config/toggles.json python3 -u ${workspaceFolder}/oanda/oanda_trading_engine.py\"",
+        "isBackground": true,
+        "options": {
+            "cwd": "${workspaceFolder}"
+        },
+        "problemMatcher": [],
+        "group": {
+            "kind": "build",
+            "isDefault": true
+        }
+    },
+    {
         "label": "Run OANDA Engine (Practice)",
         "type": "shell",
-        "command": "bash -lc \"RICK_ENV=practice python3 -u ${workspaceFolder}/oanda/oanda_trading_engine.py\"",
+        "command": "bash -lc \"RICK_ENV=practice PHX_TOGGLES_PATH=${workspaceFolder}/config/toggles.json python3 -u ${workspaceFolder}/oanda/oanda_trading_engine.py\"",
         "isBackground": true,
         "options": {
             "cwd": "${workspaceFolder}"
@@ -32,7 +46,7 @@
     {
         "label": "Run OANDA Engine (Live)",
         "type": "shell",
-        "command": "bash -lc \"RICK_ENV=live python3 -u ${workspaceFolder}/oanda/oanda_trading_engine.py\"",
+        "command": "bash -lc \"RICK_ENV=live PHX_TOGGLES_PATH=${workspaceFolder}/config/toggles.json python3 -u ${workspaceFolder}/oanda/oanda_trading_engine.py\"",
         "isBackground": true,
         "options": {
             "cwd": "${workspaceFolder}"

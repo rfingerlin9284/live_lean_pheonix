@@ -23,5 +23,42 @@
   "tp_for_scalps": false,
   "tp_for_swings": false,
 
-  "alert_on_auth": true
+  "alert_on_auth": true,
+
+  "exit_mode": "edge_hybrid",
+  "edge_exit_enabled": true,
+
+  "acd_be_pips": 6,
+  "acd_partial_pips": 12,
+  "acd_full_pips": 24,
+  "acd_partial_lock_pips": 4,
+  "acd_full_lock_pips": 2,
+
+  "chandelier_atr_period": 14,
+  "chandelier_atr_mult": 2.2,
+
+  "vol_adr_lookback": 14,
+  "vol_adr_cap_pips": 400,
+
+  "aggressive_enabled": false,
+  "base_leverage": 1.5,
+  "leverage_max": 3.0,
+  "leverage_aggressiveness": 1.0,
+
+  "decision_narration_enabled": true,
+  "terminal_decision_narration": true,
+  "terminal_decision_rate_limit_sec": 20,
+  "terminal_narrate_no_signal": false,
+
+  "slot_split_enabled": true,
+  "gem_slots": 3,
+  "scalp_slots": 9,
+  "gem_min_confidence": 0.78,
+  "gem_min_confluence": 0.65,
+  "scalp_min_confidence": null,
+  "scalp_min_confluence": 0.0,
+
+  "correlation_gate_enabled": true,
+
+  "trading_pairs": null
 }
