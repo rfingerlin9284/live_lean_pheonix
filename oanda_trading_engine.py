@@ -590,6 +590,35 @@ class OandaTradingEngine:
             regime = regime_data.regime.value if hasattr(regime_data, 'regime') else str(regime_data)
             confidence = regime_data.confidence if hasattr(regime_data, 'confidence') else 0.5
             
+            # ========================================================================
+            # WOLFPACK EDGEPACK CHOICE 1: REGIME GATE + ML CONFIDENCE GATE
+            # ========================================================================
+            if self.features.get('regime_gate', False) and self.features.get('ml_confidence_gate', False):
+                wolf_min_confidence = getattr(self.charter, 'WOLF_MIN_CONFIDENCE', 0.65)
+                
+                # Check ML confidence threshold
+                if confidence < wolf_min_confidence:
+                    log_narration(
+                        event_type="REGIME_GATE_BLOCKED",
+                        details={
+                            'symbol': symbol,
+                            'regime': regime,
+                            'confidence': confidence,
+                            'min_confidence': wolf_min_confidence,
+                            'reason': 'ML confidence below threshold'
+                        },
+                        symbol=symbol,
+                        venue='ml_intelligence'
+                    )
+                    self.display.warning(f"⚠️  REGIME GATE: {symbol} ML confidence {confidence:.2f} < {wolf_min_confidence}")
+                    return False, {
+                        'ml_available': True,
+                        'regime': regime,
+                        'confidence': confidence,
+                        'approved': False,
+                        'reason': f'ML confidence {confidence:.2f} below minimum {wolf_min_confidence}'
+                    }
+            
             # Accept signals based on regime
             direction = signal_data.get('action', 'buy').lower()
             

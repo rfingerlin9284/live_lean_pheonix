@@ -1,7 +1,40 @@
-
 {
   "version": "2.0.0",
+  "inputs": [
+    {
+      "id": "wolfpack_edgepack_choice1",
+      "type": "pickString",
+      "description": "Wolfpack EdgePack (Choice 1) — Regime Wolf Packs + Quant Hedge Recovery",
+      "options": [
+        "ON (recommended)",
+        "OFF"
+      ],
+      "default": "ON (recommended)"
+    }
+  ],
   "tasks": [
+    {
+      "label": "RBOTzilla: Apply Wolfpack EdgePack Choice 1",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-lc",
+        "if [[ \"${input:wolfpack_edgepack_choice1}\" == \"ON (recommended)\" ]]; then echo \"✅ Choice 1 ON\"; python3 tools/apply_wolfpack_edgepack_choice1.py; else echo \"⛔ Choice 1 OFF (no changes applied)\"; fi"
+      ],
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "dedicated" }
+    },
+    {
+      "label": "RBOTzilla: Rollback Wolfpack EdgePack Choice 1",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-lc",
+        "python3 tools/rollback_wolfpack_edgepack_choice1.py"
+      ],
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "dedicated" }
+    },
     {
       "label": "Check Narration (tools)",
       "type": "shell",
@@ -12,7 +45,7 @@
     {
       "label": "Run OANDA Engine (Practice)",
       "type": "shell",
-      "command": "bash -lc \"OANDA_LOAD_ENV_FILE=1 RICK_ENV=practice python3 ${workspaceFolder}/oanda/oanda_trading_engine.py\"",
+      "command": "bash -lc \"OANDA_LOAD_ENV_FILE=1 RICK_ENV=practice python3 ${workspaceFolder}/oanda_trading_engine.py\"",
       "isBackground": true,
       "presentation": { "echo": true, "reveal": "always", "panel": "dedicated" },
       "problemMatcher": []
@@ -20,7 +53,7 @@
     {
       "label": "Run OANDA Engine (Practice - Simplify)",
       "type": "shell",
-      "command": "bash -lc \"SIMPLIFY_MODE=1 OANDA_LOAD_ENV_FILE=1 RICK_ENV=practice python3 ${workspaceFolder}/oanda/oanda_trading_engine.py\"",
+      "command": "bash -lc \"SIMPLIFY_MODE=1 OANDA_LOAD_ENV_FILE=1 RICK_ENV=practice python3 ${workspaceFolder}/oanda_trading_engine.py\"",
       "isBackground": true,
       "presentation": { "echo": true, "reveal": "always", "panel": "dedicated" },
       "problemMatcher": []
@@ -28,7 +61,7 @@
     {
       "label": "Run OANDA Engine (Live)",
       "type": "shell",
-      "command": "bash -lc \"OANDA_LOAD_ENV_FILE=1 RICK_ENV=live python3 ${workspaceFolder}/oanda/oanda_trading_engine.py\"",
+      "command": "bash -lc \"OANDA_LOAD_ENV_FILE=1 RICK_ENV=live python3 ${workspaceFolder}/oanda_trading_engine.py\"",
       "isBackground": true,
       "presentation": { "echo": true, "reveal": "always", "panel": "dedicated" },
       "problemMatcher": []
@@ -69,43 +102,36 @@
       "command": "bash -lc \"bash ${workspaceFolder}/scripts/write_env_file.sh ${workspaceFolder}/.env.oanda_only ${workspaceFolder}/.env\"",
       "presentation": { "echo": true, "reveal": "always", "panel": "dedicated" },
       "problemMatcher": []
-    "tasks": [
-      {
-        "label": "1. Start Brain/Hive/Agent (with narration)",
-        "type": "shell",
-        "command": "./start_with_integrity.sh",
-        "presentation": { "reveal": "always", "panel": "dedicated" },
-        "isBackground": true,
-        "problemMatcher": []
-      "tasks": [
-        {
-          "label": "1. Start Brain/Hive/Agent (with narration)",
-          "type": "shell",
-          "command": "./start_with_integrity.sh",
-          "presentation": { "reveal": "always", "panel": "dedicated" },
-          "isBackground": true,
-          "problemMatcher": []
-        },
-        {
-          "label": "2. Start Sentinel+Watchdog (with fallback)",
-          "type": "shell",
-          "command": "python3 active_trade_monitor.py | tee /tmp/sentinel.log & python3 system_watchdog.py | tee /tmp/watchdog.log",
-          "presentation": { "reveal": "always", "panel": "dedicated" },
-          "isBackground": true,
-          "problemMatcher": []
-        },
-        {
-          "label": "3. Self-Repair Helper (Autonomous)",
-          "type": "shell",
-          "command": "python3 narration_self_repair.py",
-          "presentation": { "reveal": "always", "panel": "dedicated" },
-          "problemMatcher": []
-        },
-        {
-          "label": "4. Fallback to Raw Data (Automatic)",
-          "type": "shell",
-          "command": "echo 'Fallback: Showing raw trade info only. System remains connected.'",
-          "presentation": { "reveal": "always", "panel": "dedicated" },
-          "problemMatcher": []
-        }
-      ]
+    },
+    {
+      "label": "1. Start Brain/Hive/Agent (with narration)",
+      "type": "shell",
+      "command": "./start_with_integrity.sh",
+      "presentation": { "reveal": "always", "panel": "dedicated" },
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "2. Start Sentinel+Watchdog (with fallback)",
+      "type": "shell",
+      "command": "python3 active_trade_monitor.py | tee /tmp/sentinel.log & python3 system_watchdog.py | tee /tmp/watchdog.log",
+      "presentation": { "reveal": "always", "panel": "dedicated" },
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "3. Self-Repair Helper (Autonomous)",
+      "type": "shell",
+      "command": "python3 narration_self_repair.py",
+      "presentation": { "reveal": "always", "panel": "dedicated" },
+      "problemMatcher": []
+    },
+    {
+      "label": "4. Fallback to Raw Data (Automatic)",
+      "type": "shell",
+      "command": "echo 'Fallback: Showing raw trade info only. System remains connected.'",
+      "presentation": { "reveal": "always", "panel": "dedicated" },
+      "problemMatcher": []
+    }
+  ]
+}
