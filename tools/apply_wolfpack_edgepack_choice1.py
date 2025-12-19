@@ -156,14 +156,15 @@ def run_invariant_checks():
     # Check 6: Surgeon harmony enabled
     surgeon_file = PROJECT_ROOT / "PhoenixV2" / "operations" / "surgeon.py"
     if surgeon_file.exists():
+        # More robust check: look for the configurable parameters
         with open(surgeon_file) as f:
             content = f.read()
-            if "EXIT HARMONY" in content:
+            if "min_profit_r_for_trail" in content and "max_trail_lock_r" in content:
                 checks_passed.append(("Surgeon harmony enabled", "Trail delay: +0.8R"))
                 print(f"✅ PASS: surgeon harmony enabled (trail delay: +0.8R)")
             else:
-                checks_failed.append(("Surgeon harmony", "Not found in code"))
-                print(f"❌ FAIL: surgeon harmony not found")
+                checks_failed.append(("Surgeon harmony", "Parameters not found in code"))
+                print(f"❌ FAIL: surgeon harmony parameters not found")
     else:
         checks_failed.append(("Surgeon file", "Not found"))
         print(f"❌ FAIL: surgeon.py not found")

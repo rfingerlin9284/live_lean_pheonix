@@ -47,6 +47,10 @@ class Surgeon(threading.Thread):
         self.breakeven_trigger_pct = 0.0005  # 0.05% profit (~5 pips) -> breakeven (Hyper-Tight)
         self.trailing_activation_pct = 0.0005  # 0.05% profit (~5 pips) -> start trailing (Hyper-Tight)
         
+        # Wolfpack EdgePack Choice 1: Exit Harmony Constants
+        self.min_profit_r_for_trail = 0.8  # Minimum profit in R before trailing activates
+        self.max_trail_lock_r = 2.5  # Maximum profit lock to prevent destroying RR
+        
         # Launchpad Failure (Immediate Kill)
         self.launchpad_failure_pct = -0.002 # -0.2% loss
         self.launchpad_window_minutes = 45 # First 45 mins
@@ -355,10 +359,8 @@ class Surgeon(threading.Thread):
                         profit_r = 0
                     
                     # WOLFPACK EXIT HARMONY: Only trail after +0.8R (or +1.0R for more purity)
-                    min_profit_r_for_trail = 0.8  # Can increase to 1.0 for more purity
-                    
-                    # Only activate Architect Trail if trade is at +0.8R or Risk Off is triggered
-                    if profit_r >= min_profit_r_for_trail or risk_off:
+                    # Only activate Architect Trail if trade is at min_profit_r_for_trail or Risk Off is triggered
+                    if profit_r >= self.min_profit_r_for_trail or risk_off:
                         # Fetch Candles
                         df = self.router.get_candles(instrument, timeframe='M15', limit = 50)
                         
@@ -384,7 +386,7 @@ class Surgeon(threading.Thread):
                             if is_long:
                                 # For long: new SL must be above old SL but below a point that destroys RR
                                 # Ensure we don't move SL so close it cuts winners before reaching 3.2R target
-                                max_allowed_sl = entry_price + (initial_risk * 2.5)  # Don't go beyond 2.5R profit lock
+                                max_allowed_sl = entry_price + (initial_risk * self.max_trail_lock_r)
                                 if chandelier_stop > current_sl and chandelier_stop < max_allowed_sl:
                                     # Validate it's below current price (don't stop out instantly unless chaos)
                                     if chandelier_stop < current_price:
@@ -392,14 +394,14 @@ class Surgeon(threading.Thread):
                                         self.router.modify_trade_sl(trade_id, chandelier_stop, broker = broker_type, instrument = instrument)
                             else: # Short
                                 # For short: new SL must be below old SL but above a point that destroys RR
-                                min_allowed_sl = entry_price - (initial_risk * 2.5)  # Don't go beyond 2.5R profit lock
+                                min_allowed_sl = entry_price - (initial_risk * self.max_trail_lock_r)
                                 if chandelier_stop < current_sl and chandelier_stop > min_allowed_sl:
                                     if chandelier_stop > current_price:
                                         logger.info(f"🏛️ ARCHITECT TRAIL: {instrument} moving SL {current_sl} -> {chandelier_stop:.5f} (profit: {profit_r:.2f}R)")
                                         self.router.modify_trade_sl(trade_id, chandelier_stop, broker = broker_type, instrument = instrument)
                     else:
                         # Not enough profit yet - let the position breathe
-                        logger.debug(f"🛡️ EXIT HARMONY: {instrument} at {profit_r:.2f}R profit, need {min_profit_r_for_trail}R before trailing")
+                        logger.debug(f"🛡️ EXIT HARMONY: {instrument} at {profit_r:.2f}R profit, need {self.min_profit_r_for_trail}R before trailing")
 
                 except Exception as e:
                     pass
