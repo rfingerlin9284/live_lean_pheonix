@@ -39,9 +39,9 @@ class RickCharter:
     MAX_HOLD_DURATION = timedelta(hours=MAX_HOLD_DURATION_HOURS)
 
     # RISK MANAGEMENT
-    DAILY_LOSS_BREAKER_PCT = -5.0  # -5% daily loss halt
-    MIN_NOTIONAL_USD = 10000         # $10,000 minimum notional per trade (Balanced Profile)
-    MIN_EXPECTED_PNL_USD = 35.0      # Gross PnL at TP must be >= $35 (Balanced Profile)
+    DAILY_LOSS_BREAKER_PCT = 0.03  # 3% daily loss halt (Wolfpack EdgePack)
+    MIN_NOTIONAL_USD = 15000         # $15,000 minimum notional per trade (Wolfpack EdgePack)
+    MIN_EXPECTED_PNL_USD = 10.0      # Gross PnL at TP must be >= $10 (Wolfpack EdgePack)
 
     # Minimum risk-reward ratio (guide compliance: 3.2)
     MIN_RISK_REWARD_RATIO = 3.2
@@ -51,17 +51,24 @@ class RickCharter:
     REJECTED_TIMEFRAMES = [RejectedTimeFrame.M1, RejectedTimeFrame.M5]
 
     # EXECUTION LIMITS
-    MAX_CONCURRENT_POSITIONS = 3
+    MAX_CONCURRENT_POSITIONS = 12  # Updated for Wolfpack EdgePack
+    MAX_POSITIONS_PER_SYMBOL = 4   # Max positions per symbol
     MAX_DAILY_TRADES = 12
     MAX_PLACEMENT_LATENCY_MS = 300  # Maximum 300ms for order placement
+    MAX_MARGIN_USAGE = 0.25  # 25% max margin usage
 
     # SPREAD & SLIPPAGE GATES
     FX_MAX_SPREAD_ATR_MULTIPLIER = 0.15    # 0.15x ATR14
     CRYPTO_MAX_SPREAD_ATR_MULTIPLIER = 0.10 # 0.10x ATR14
+    MAX_SPREAD_PIPS = 1.8  # Maximum spread in pips (Wolfpack EdgePack)
 
     # STOP LOSS REQUIREMENTS
     FX_STOP_LOSS_ATR_MULTIPLIER = 1.2      # 1.2x ATR
     CRYPTO_STOP_LOSS_ATR_MULTIPLIER = 1.5  # 1.5x ATR
+    
+    # WOLFPACK REGIME GATING (Wolfpack EdgePack Choice 1)
+    WOLF_MIN_CONFIDENCE = 0.65  # Minimum ML confidence for regime pack
+    WOLF_MIN_TOP_SHARPE = 1.25  # Minimum Sharpe ratio for top pack
 
     @classmethod
     def validate_pin(cls, pin: int) -> bool:

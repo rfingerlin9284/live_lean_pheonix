@@ -1,0 +1,10 @@
+{
+  "wolfpack_edgepack_choice1": true,
+  "regime_gate": true,
+  "ml_confidence_gate": true,
+  "spread_guard": true,
+  "cost_logging": true,
+  "single_instance_guard": true,
+  "quant_hedge_recovery": true,
+  "surgeon_exit_harmony": true
+}
