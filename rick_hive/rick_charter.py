@@ -60,7 +60,7 @@ class RickCharter:
     # SPREAD & SLIPPAGE GATES
     FX_MAX_SPREAD_ATR_MULTIPLIER = 0.15    # 0.15x ATR14
     CRYPTO_MAX_SPREAD_ATR_MULTIPLIER = 0.10 # 0.10x ATR14
-    MAX_SPREAD_PIPS = 1.8  # Maximum spread in pips (Wolfpack EdgePack)
+    MAX_SPREAD_PIPS = 1.2  # Maximum spread in pips (Tightened to reduce churning costs)
 
     # STOP LOSS REQUIREMENTS
     FX_STOP_LOSS_ATR_MULTIPLIER = 1.2      # 1.2x ATR

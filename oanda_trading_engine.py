@@ -301,6 +301,10 @@ class OandaTradingEngine:
         self.total_pnl = 0.0
         self.is_running = False
         self.session_start = datetime.now(timezone.utc)
+        
+        # Anti-churn: minimum hold time between trades (30 seconds)
+        self.last_trade_time = 0
+        self.min_hold_seconds = 30
 
         # TradeManager settings
         # Only consider converting TP -> trailing SL after 60 seconds
@@ -989,6 +993,26 @@ class OandaTradingEngine:
     def place_trade(self, symbol: str, direction: str):
         """Place Charter-compliant OCO order with full logging (environment-agnostic)"""
         try:
+            # ========================================================================
+            # ANTI-CHURN: Minimum 30s hold time between trades
+            # ========================================================================
+            current_time = time.time()
+            if current_time - self.last_trade_time < self.min_hold_seconds:
+                time_remaining = self.min_hold_seconds - (current_time - self.last_trade_time)
+                self.display.warning(f"⏱️  ANTI-CHURN: {time_remaining:.1f}s until next trade allowed")
+                log_narration(
+                    event_type="ANTI_CHURN_BLOCK",
+                    details={
+                        "symbol": symbol,
+                        "time_since_last_trade": current_time - self.last_trade_time,
+                        "min_hold_seconds": self.min_hold_seconds,
+                        "time_remaining": time_remaining
+                    },
+                    symbol=symbol,
+                    venue="oanda"
+                )
+                return None
+            
             # Get current price
             price_data = self.get_current_price(symbol)
             if not price_data:
@@ -1258,6 +1282,9 @@ class OandaTradingEngine:
                 self.display.info("🛡️ Position tracked for guardian gate monitoring", "", Colors.BRIGHT_CYAN)
                 
                 self.total_trades += 1
+                
+                # Update last trade time for anti-churn
+                self.last_trade_time = time.time()
                 
                 # Log successful placement with narration
                 log_narration(
