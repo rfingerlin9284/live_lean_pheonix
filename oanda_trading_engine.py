@@ -6,6 +6,7 @@ Environment-Agnostic: practice/live determined ONLY by API endpoint & token
 - Real-time OANDA API for market data and execution
 - Full RICK Hive Mind + ML Intelligence + Immutable Risk Management
 - Momentum-based TP cancellation with adaptive trailing stops
+- Wolfpack EdgePack Choice 1: Regime Wolf Packs + Quant Hedge Recovery
 PIN: 841921 | Generated: 2025-10-15
 """
 
@@ -15,10 +16,18 @@ import os
 import time
 import asyncio
 import requests
+import json
 from datetime import datetime, timezone
 from typing import Dict, List, Optional, Tuple
 
 sys.path.insert(0, str(Path(__file__).parent.resolve()))
+
+# Load features config
+FEATURES_CONFIG = {}
+features_file = Path(__file__).parent / 'config' / 'features.json'
+if features_file.exists():
+    with open(features_file) as f:
+        FEATURES_CONFIG = json.load(f)
 
 # Load environment variables manually
 env_file = str(Path(__file__).parent / 'master.env')
@@ -39,6 +48,15 @@ from util.narration_logger import log_narration, log_pnl
 from util.rick_narrator import RickNarrator
 from util.usd_converter import get_usd_notional
 from systems.momentum_signals import generate_signal
+
+# Wolfpack EdgePack Choice 1 - Quant Hedge Recovery
+HEDGE_RECOVERY_AVAILABLE = False
+if FEATURES_CONFIG.get('quant_hedge_recovery', False):
+    try:
+        from execution.quant_hedge_recovery import QuantHedgeRecovery
+        HEDGE_RECOVERY_AVAILABLE = True
+    except ImportError:
+        print("⚠️  Quant Hedge Recovery module not available")
 
 # ML Intelligence imports
 try:
@@ -144,6 +162,16 @@ class OandaTradingEngine:
         else:
             self.momentum_detector = None
             self.trailing_system = None
+        
+        # Initialize Wolfpack EdgePack Choice 1 - Hedge Recovery
+        if HEDGE_RECOVERY_AVAILABLE and FEATURES_CONFIG.get('quant_hedge_recovery', False):
+            self.hedge_recovery = QuantHedgeRecovery(charter=self.charter, oanda_connector=self.oanda)
+            self.display.success("✅ Quant Hedge Recovery ACTIVE")
+        else:
+            self.hedge_recovery = None
+        
+        # Store features config
+        self.features = FEATURES_CONFIG
         
         # Initialize Strategy Aggregator (combines 5 prototype strategies)
         try:
@@ -273,6 +301,10 @@ class OandaTradingEngine:
         self.total_pnl = 0.0
         self.is_running = False
         self.session_start = datetime.now(timezone.utc)
+        
+        # Anti-churn: minimum hold time between trades (30 seconds)
+        self.last_trade_time = 0
+        self.min_hold_seconds = 30
 
         # TradeManager settings
         # Only consider converting TP -> trailing SL after 60 seconds
@@ -562,6 +594,35 @@ class OandaTradingEngine:
             regime = regime_data.regime.value if hasattr(regime_data, 'regime') else str(regime_data)
             confidence = regime_data.confidence if hasattr(regime_data, 'confidence') else 0.5
             
+            # ========================================================================
+            # WOLFPACK EDGEPACK CHOICE 1: REGIME GATE + ML CONFIDENCE GATE
+            # ========================================================================
+            if self.features.get('regime_gate', False) and self.features.get('ml_confidence_gate', False):
+                wolf_min_confidence = getattr(self.charter, 'WOLF_MIN_CONFIDENCE', 0.65)
+                
+                # Check ML confidence threshold
+                if confidence < wolf_min_confidence:
+                    log_narration(
+                        event_type="REGIME_GATE_BLOCKED",
+                        details={
+                            'symbol': symbol,
+                            'regime': regime,
+                            'confidence': confidence,
+                            'min_confidence': wolf_min_confidence,
+                            'reason': 'ML confidence below threshold'
+                        },
+                        symbol=symbol,
+                        venue='ml_intelligence'
+                    )
+                    self.display.warning(f"⚠️  REGIME GATE: {symbol} ML confidence {confidence:.2f} < {wolf_min_confidence}")
+                    return False, {
+                        'ml_available': True,
+                        'regime': regime,
+                        'confidence': confidence,
+                        'approved': False,
+                        'reason': f'ML confidence {confidence:.2f} below minimum {wolf_min_confidence}'
+                    }
+            
             # Accept signals based on regime
             direction = signal_data.get('action', 'buy').lower()
             
@@ -611,6 +672,59 @@ class OandaTradingEngine:
             # ML error - be permissive, don't block trade
             self.display.warning(f"ML evaluation error for {symbol}: {str(e)}")
             return True, {'ml_available': True, 'error': str(e), 'approved': True}
+    
+    def check_spread_guard(self, symbol: str, bid: float, ask: float) -> Tuple[bool, Dict]:
+        """
+        Wolfpack EdgePack Choice 1 - Spread Guard
+        Check if spread is within acceptable limits before placing order
+        
+        Args:
+            symbol: Currency pair
+            bid: Current bid price
+            ask: Current ask price
+            
+        Returns:
+            (approved: bool, details: dict)
+        """
+        if not self.features.get('spread_guard', False):
+            return True, {'spread_guard_enabled': False}
+        
+        # Calculate spread in pips
+        pip_size = 0.01 if 'JPY' in symbol else 0.0001
+        spread_pips = (ask - bid) / pip_size
+        
+        # Get max spread from charter
+        max_spread_pips = getattr(self.charter, 'MAX_SPREAD_PIPS', 1.8)
+        
+        if spread_pips > max_spread_pips:
+            # Spread too wide - reject
+            log_narration(
+                event_type="GATE_REJECTION",
+                details={
+                    'symbol': symbol,
+                    'reason': 'SPREAD_TOO_WIDE',
+                    'spread_pips': round(spread_pips, 2),
+                    'max_spread_pips': max_spread_pips,
+                    'bid': bid,
+                    'ask': ask
+                },
+                symbol=symbol,
+                venue='oanda'
+            )
+            self.display.warning(f"⚠️  SPREAD GUARD: {symbol} spread {spread_pips:.2f} pips > {max_spread_pips} pips")
+            return False, {
+                'spread_guard_enabled': True,
+                'approved': False,
+                'spread_pips': spread_pips,
+                'max_spread_pips': max_spread_pips
+            }
+        
+        return True, {
+            'spread_guard_enabled': True,
+            'approved': True,
+            'spread_pips': spread_pips,
+            'max_spread_pips': max_spread_pips
+        }
     
     def amplify_signal_with_hive(self, symbol: str, signal_data: Dict) -> Dict:
         """
@@ -879,6 +993,26 @@ class OandaTradingEngine:
     def place_trade(self, symbol: str, direction: str):
         """Place Charter-compliant OCO order with full logging (environment-agnostic)"""
         try:
+            # ========================================================================
+            # ANTI-CHURN: Minimum 30s hold time between trades
+            # ========================================================================
+            current_time = time.time()
+            if current_time - self.last_trade_time < self.min_hold_seconds:
+                time_remaining = self.min_hold_seconds - (current_time - self.last_trade_time)
+                self.display.warning(f"⏱️  ANTI-CHURN: {time_remaining:.1f}s until next trade allowed")
+                log_narration(
+                    event_type="ANTI_CHURN_BLOCK",
+                    details={
+                        "symbol": symbol,
+                        "time_since_last_trade": current_time - self.last_trade_time,
+                        "min_hold_seconds": self.min_hold_seconds,
+                        "time_remaining": time_remaining
+                    },
+                    symbol=symbol,
+                    venue="oanda"
+                )
+                return None
+            
             # Get current price
             price_data = self.get_current_price(symbol)
             if not price_data:
@@ -893,6 +1027,20 @@ class OandaTradingEngine:
             
             # Use bid for SELL, ask for BUY
             entry_price = price_data['ask'] if direction == "BUY" else price_data['bid']
+            
+            # ========================================================================
+            # WOLFPACK EDGEPACK CHOICE 1: SPREAD GUARD
+            # ========================================================================
+            spread_approved, spread_details = self.check_spread_guard(
+                symbol=symbol,
+                bid=price_data['bid'],
+                ask=price_data['ask']
+            )
+            
+            if not spread_approved:
+                # Spread too wide - reject trade
+                self.display.error(f"❌ SPREAD GUARD BLOCKED: {symbol} spread too wide")
+                return None
             
             # Calculate Charter-compliant position size
             position_size = self.calculate_position_size(symbol, entry_price)
@@ -1021,6 +1169,29 @@ class OandaTradingEngine:
             self.display.info("Notional Value", f"${notional_value:,.0f} ✅", Colors.BRIGHT_GREEN)
             self.display.info("R:R Ratio", f"{rr_ratio:.2f}:1 ✅", Colors.BRIGHT_GREEN)
             
+            # ========================================================================
+            # WOLFPACK EDGEPACK CHOICE 1: COST LOGGING
+            # ========================================================================
+            if self.features.get('cost_logging', False):
+                pip_size = 0.01 if 'JPY' in symbol else 0.0001
+                spread_pips = spread_details.get('spread_pips', 0)
+                estimated_cost_usd = (spread_pips * pip_size * abs(units)) / pip_size  # Simple estimate
+                expected_pnl_usd = (reward / pip_size) * pip_size * abs(units) / pip_size
+                
+                log_narration(
+                    event_type="COST_ANALYSIS",
+                    details={
+                        'symbol': symbol,
+                        'spread_pips': spread_pips,
+                        'estimated_cost_usd': round(estimated_cost_usd, 2),
+                        'rr_ratio': round(rr_ratio, 2),
+                        'expected_pnl_usd': round(expected_pnl_usd, 2),
+                        'notional_usd': round(notional_value, 2)
+                    },
+                    symbol=symbol,
+                    venue='oanda'
+                )
+            
             # Place OCO order
             self.display.alert(f"Placing Charter-compliant {direction} OCO order for {symbol}...", "INFO")
             
@@ -1111,6 +1282,9 @@ class OandaTradingEngine:
                 self.display.info("🛡️ Position tracked for guardian gate monitoring", "", Colors.BRIGHT_CYAN)
                 
                 self.total_trades += 1
+                
+                # Update last trade time for anti-churn
+                self.last_trade_time = time.time()
                 
                 # Log successful placement with narration
                 log_narration(

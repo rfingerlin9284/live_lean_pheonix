@@ -47,6 +47,10 @@ class Surgeon(threading.Thread):
         self.breakeven_trigger_pct = 0.0005  # 0.05% profit (~5 pips) -> breakeven (Hyper-Tight)
         self.trailing_activation_pct = 0.0005  # 0.05% profit (~5 pips) -> start trailing (Hyper-Tight)
         
+        # Wolfpack EdgePack Choice 1: Exit Harmony Constants
+        self.min_profit_r_for_trail = 0.8  # Minimum profit in R before trailing activates
+        self.max_trail_lock_r = 2.5  # Maximum profit lock to prevent destroying RR
+        
         # Launchpad Failure (Immediate Kill)
         self.launchpad_failure_pct = -0.002 # -0.2% loss
         self.launchpad_window_minutes = 45 # First 45 mins
@@ -198,11 +202,39 @@ class Surgeon(threading.Thread):
                     continue
 
             # === RULE 2c: ROTTING FRUIT (Time Stop for Losers) ===
-            # If a trade is RED for too long, cut it to free up margin.
+            # WOLFPACK EDGEPACK CHOICE 1: SURGEON EXIT HARMONY
+            # Only cut losers early IF regime has flipped against the pack AND ML confidence is below threshold.
+            # Otherwise let the original SL do its job (that's what it's for).
             if age_hours > self.max_red_hold_hours and unrealized_pl < 0:
-                 logger.warning(f"🍎 ROTTING FRUIT: {instrument} has been RED for {age_hours:.1f}h. Cutting loss at ${unrealized_pl:.2f}.")
-                 self.router.close_trade(trade_id, broker = broker_type)
-                 continue
+                # Check if we should apply early exit or let SL work
+                should_cut_early = True
+                
+                # Try to get regime/confidence from brain if available
+                if hasattr(self, 'brain') and self.brain:
+                    try:
+                        fresh_signal = self.brain.get_signal(instrument)
+                        if fresh_signal:
+                            signal_dir = fresh_signal.get('direction')
+                            confidence = fresh_signal.get('confidence', 0)
+                            
+                            # Only cut early if signal has flipped AND confidence is low
+                            regime_flipped = (is_long and signal_dir == 'SELL') or (not is_long and signal_dir == 'BUY')
+                            
+                            if not regime_flipped:
+                                # Regime hasn't flipped - let SL work
+                                should_cut_early = False
+                                logger.info(f"🛡️ EXIT HARMONY: {instrument} RED {age_hours:.1f}h, but regime intact. Letting SL work.")
+                            elif confidence >= 0.65:
+                                # Regime flipped but high confidence - still let SL work
+                                should_cut_early = False
+                                logger.info(f"🛡️ EXIT HARMONY: {instrument} RED {age_hours:.1f}h, regime flipped but confidence high. Letting SL work.")
+                    except Exception:
+                        pass
+                
+                if should_cut_early:
+                    logger.warning(f"🍎 ROTTING FRUIT: {instrument} has been RED for {age_hours:.1f}h. Cutting loss at ${unrealized_pl:.2f}.")
+                    self.router.close_trade(trade_id, broker = broker_type)
+                    continue
             
             # === RULE 3: WINNER'S LOCK (Breakeven) ===
             is_long = units > 0
@@ -307,11 +339,28 @@ class Surgeon(threading.Thread):
                         logger.error(f"Vigilante Check Failed for {instrument}: {e}")
 
             # === RULE 4: ARCHITECT SMART TRAIL (Chandelier Exit) ===
+            # WOLFPACK EDGEPACK CHOICE 1: SURGEON EXIT HARMONY
+            # Do NOT trail until at least +0.8R profit to give the 3.2R design room to work
             # Replaces the old simple trailing. This follows volatility.
             if current_price:
                 try:
-                    # Only activate Architect Trail if trade is decently profitable or Risk Off is triggered
-                    if profit_pct >= self.trailing_activation_pct or risk_off:
+                    # Calculate R (risk) from original SL distance
+                    # Estimate: if SL is 1.2 * ATR, then R = abs(entry_price - current_sl)
+                    # For trailing, we need at least +0.8R profit before activating
+                    
+                    # Calculate profit in R multiples
+                    if current_sl and entry_price != 0:
+                        initial_risk = abs(entry_price - current_sl)  # 1R distance
+                        if is_long:
+                            profit_r = (current_price - entry_price) / initial_risk if initial_risk > 0 else 0
+                        else:
+                            profit_r = (entry_price - current_price) / initial_risk if initial_risk > 0 else 0
+                    else:
+                        profit_r = 0
+                    
+                    # WOLFPACK EXIT HARMONY: Only trail after +0.8R (or +1.0R for more purity)
+                    # Only activate Architect Trail if trade is at min_profit_r_for_trail or Risk Off is triggered
+                    if profit_r >= self.min_profit_r_for_trail or risk_off:
                         # Fetch Candles
                         df = self.router.get_candles(instrument, timeframe='M15', limit = 50)
                         
@@ -333,17 +382,26 @@ class Surgeon(threading.Thread):
                         
                         if chandelier_stop > 0:
                             # LOGIC: Only move stop closer, never wider
+                            # WOLFPACK EXIT HARMONY: Never pull SL above a threshold that destroys expected RR
                             if is_long:
-                                if chandelier_stop > current_sl:
+                                # For long: new SL must be above old SL but below a point that destroys RR
+                                # Ensure we don't move SL so close it cuts winners before reaching 3.2R target
+                                max_allowed_sl = entry_price + (initial_risk * self.max_trail_lock_r)
+                                if chandelier_stop > current_sl and chandelier_stop < max_allowed_sl:
                                     # Validate it's below current price (don't stop out instantly unless chaos)
                                     if chandelier_stop < current_price:
-                                        logger.info(f"🏛️ ARCHITECT TRAIL: {instrument} moving SL {current_sl} -> {chandelier_stop:.5f}")
+                                        logger.info(f"🏛️ ARCHITECT TRAIL: {instrument} moving SL {current_sl} -> {chandelier_stop:.5f} (profit: {profit_r:.2f}R)")
                                         self.router.modify_trade_sl(trade_id, chandelier_stop, broker = broker_type, instrument = instrument)
                             else: # Short
-                                if chandelier_stop < current_sl:
+                                # For short: new SL must be below old SL but above a point that destroys RR
+                                min_allowed_sl = entry_price - (initial_risk * self.max_trail_lock_r)
+                                if chandelier_stop < current_sl and chandelier_stop > min_allowed_sl:
                                     if chandelier_stop > current_price:
-                                        logger.info(f"🏛️ ARCHITECT TRAIL: {instrument} moving SL {current_sl} -> {chandelier_stop:.5f}")
+                                        logger.info(f"🏛️ ARCHITECT TRAIL: {instrument} moving SL {current_sl} -> {chandelier_stop:.5f} (profit: {profit_r:.2f}R)")
                                         self.router.modify_trade_sl(trade_id, chandelier_stop, broker = broker_type, instrument = instrument)
+                    else:
+                        # Not enough profit yet - let the position breathe
+                        logger.debug(f"🛡️ EXIT HARMONY: {instrument} at {profit_r:.2f}R profit, need {self.min_profit_r_for_trail}R before trailing")
 
                 except Exception as e:
                     pass
