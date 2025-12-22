@@ -26,11 +26,17 @@
   "alert_on_auth": true,
 
   "no_take_profit": true,
-  "zombie_kill_enabled": false,
+  "zombie_kill_enabled": true,
+  "zombie_min_age_minutes": 15,
+  "zombie_threshold_pips": 5,
   "idol_trait_enabled": false,
+  "max_positions_per_region": 1,
 
   "close_in_settings": {
     "enabled": true,
+    "fvg_lookback": 25,
+    "fvg_near_pips": 6.0,
+    "fib_lookback": 55,
     "fib_exts_closein": [1.272, 1.618],
     "min_profit_pips": 4.0,
     "min_gap_pips": 0.5,

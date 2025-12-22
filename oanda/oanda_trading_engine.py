@@ -31,9 +31,18 @@ from core.momentum_signals import generate_signal
 # ----------------------------------------------------------------------------------------
 
 import random
+import time
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger('oanda_consolidated')
+
+# Simple currency->region map used for diversity gating
+REGION_MAP = {
+    'EUR': 'EU', 'GBP': 'EU',
+    'USD': 'US',
+    'AUD': 'ANZ', 'NZD': 'ANZ',
+    'JPY': 'ASIA', 'CAD': 'NA', 'CHF': 'EU'
+}
 
 
 class OandaTradingEngine:
@@ -116,6 +125,8 @@ class OandaTradingEngine:
         self._scale_out_done: Dict[str, set] = {}
         # Close-in tighten progress per trade id (integer step)
         self._close_in_state: Dict[str, int] = {}
+        # Track when trades were first seen for zombie detection
+        self._trade_first_seen: Dict[str, float] = {}
         # Market tick emitter (practice/canary only)
         self.market_tick_task = None
         self.market_tick_symbol = 'EUR_USD'
@@ -314,6 +325,23 @@ class OandaTradingEngine:
         if use_tp:
             tp = entry + (self.TAKE_PROFIT_PIPS * pip) if direction == 'BUY' else entry - (self.TAKE_PROFIT_PIPS * pip)
 
+        # Diversity check: prevent too many positions in the same region
+        def _region_for(sym: str) -> str:
+            base = (sym.split('_', 1) + [''])[0]
+            return REGION_MAP.get(base, 'OTHER')
+
+        max_per_region = int(self.toggles.get('max_positions_per_region', 1))
+        target_region = _region_for(symbol)
+        region_count = 0
+        for t in self.active_positions.values():
+            inst = (t.get('instrument') or t.get('symbol') or '')
+            if _region_for(inst) == target_region:
+                region_count += 1
+        if region_count >= max_per_region:
+            self.display.info('Diversity', f"Blocked opening {symbol} — region {target_region} has {region_count} positions")
+            log_narration(event_type='TRADE_BLOCKED', details={'symbol': symbol, 'reason': 'DIVERSITY_BLOCKED', 'region': target_region})
+            return
+
         # Calculate units to meet minimum notional with 5% buffer
         # For USD base pairs (USD_XXX): 1 unit = $1 notional
         # For non-USD base pairs (XXX_USD): 1 unit = entry_price USD notional
@@ -426,6 +454,9 @@ class OandaTradingEngine:
                                 if set_resp.get('success'):
                                     self._close_in_state[trade_id] = proposed_step
                                     log_narration(event_type='CLOSE_IN_TIGHTEN', details={'trade_id': trade_id, 'symbol': symbol, 'old_sl': current_sl, 'new_sl': proposed, 'profit_pips': profit_pips, 'step': proposed_step, 'max_steps': max_steps})
+            except Exception:
+                pass
+
             # Optional scale-out (incremental partial closes)
             try:
                 if self.toggles.get('scale_out_enabled', True) and trade_id:
