@@ -3,16 +3,18 @@
   "tight_trailing": true,
   "two_step_sl": true,
 
-  "min_confidence": 0.65,
+  "min_confidence": 0.72,
   "min_confidence_by_venue": {
-    "oanda": 0.65,
-    "ibkr": 0.65,
-    "coinbase": 0.70
+    "oanda": 0.72,
+    "ibkr": 0.70,
+    "coinbase": 0.75
   },
 
-  "be_trigger_pips": 3,
-  "trail_trigger_pips": 8,
-  "tight_trail_distance_pips": 3,
+  "profit_floor_trigger_pips": 0.5,
+  "profit_floor_lock_pips": 0.5,
+  "be_trigger_pips": 0.5,
+  "trail_trigger_pips": 4,
+  "tight_trail_distance_pips": 1.5,
 
   "scale_out_enabled": true,
   "scale_out_levels": [
@@ -32,6 +34,10 @@
   "idol_trait_enabled": false,
   "max_positions_per_region": 1,
 
+  "remove_tp_on_strong_signal": true,
+  "strong_signal_confidence_threshold": 0.78,
+  "min_stop_gap_pips": 0.1,
+
   "close_in_settings": {
     "enabled": true,
     "fvg_lookback": 25,
@@ -39,7 +45,7 @@
     "fib_lookback": 55,
     "fib_exts_closein": [1.272, 1.618],
     "min_profit_pips": 4.0,
-    "min_gap_pips": 0.5,
+    "min_gap_pips": 2.0,
     "closein_step_pips": 0.5,
     "closein_max_steps": 4,
     "trigger_ratio": 2.0
