@@ -1,0 +1,41 @@
+{
+  "no_simulation_mode": true,
+  "tight_trailing": true,
+  "two_step_sl": true,
+
+  "min_confidence": 0.65,
+  "min_confidence_by_venue": {
+    "oanda": 0.65,
+    "ibkr": 0.65,
+    "coinbase": 0.70
+  },
+
+  "be_trigger_pips": 3,
+  "trail_trigger_pips": 8,
+  "tight_trail_distance_pips": 3,
+
+  "scale_out_enabled": true,
+  "scale_out_levels": [
+    {"pips": 5, "fraction": 0.33},
+    {"pips": 10, "fraction": 0.33}
+  ],
+
+  "tp_for_scalps": false,
+  "tp_for_swings": false,
+
+  "alert_on_auth": true,
+
+  "no_take_profit": true,
+  "zombie_kill_enabled": false,
+  "idol_trait_enabled": false,
+
+  "close_in_settings": {
+    "enabled": true,
+    "fib_exts_closein": [1.272, 1.618],
+    "min_profit_pips": 4.0,
+    "min_gap_pips": 0.5,
+    "closein_step_pips": 0.5,
+    "closein_max_steps": 4,
+    "trigger_ratio": 2.0
+  }
+}
