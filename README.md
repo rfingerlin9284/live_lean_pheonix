@@ -4,7 +4,10 @@ This repository contains the complete rebuild instructions for the RBOTZILLA PHO
 
 ---
 
-## Start Here — Three Documents
+## Start Here — Four Documents
+
+### 0. [GITHUB_BASICS.md](GITHUB_BASICS.md)
+**New to GitHub? Start here.** Explains what GitHub terms like "commits ahead", "branches", and "repository" mean in plain English. Also includes step-by-step instructions for downloading VS Code on Linux and how to download these files as a ZIP without any coding knowledge.
 
 ### 1. [SETUP_INSTRUCTIONS.md](SETUP_INSTRUCTIONS.md)
 **Read this first if you are a non-coder.** Plain-English guide explaining what to do step by step, how to give the VS Code agent its instructions, and what to expect while the system runs.

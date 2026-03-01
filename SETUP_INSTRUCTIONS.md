@@ -40,7 +40,12 @@ The code comes entirely from your existing GitHub repositories. Nothing new is b
 
 ## Step 1 — Open VS Code
 
-Open VS Code on your new computer. If you do not have it, download it from code.visualstudio.com and install it.
+Open VS Code on your new computer. If you do not have it yet:
+
+- **Windows or Mac:** Download it from **code.visualstudio.com** and run the installer.
+- **Linux:** See the detailed Linux install steps in [GITHUB_BASICS.md](GITHUB_BASICS.md) — it covers Ubuntu, Debian, Fedora, and all other common Linux distributions with exact commands.
+
+**Not sure how to download the files from GitHub first?** See [GITHUB_BASICS.md](GITHUB_BASICS.md) for a plain-English guide on downloading this repository as a ZIP file, and for explanations of GitHub terms like "commits ahead" and "branches".
 
 ---
 
