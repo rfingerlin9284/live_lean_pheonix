@@ -4,6 +4,30 @@ This repository contains the complete rebuild instructions for the RBOTZILLA PHO
 
 ---
 
+## ⬇️ Download / Get Started
+
+**This is the repo you need to download.**
+
+👉 **https://github.com/rfingerlin9284/live_lean_pheonix**
+
+### How to download it
+
+**Option A — Download as a ZIP (no coding required):**
+1. Go to https://github.com/rfingerlin9284/live_lean_pheonix
+2. Click the green **Code** button near the top right
+3. Click **Download ZIP**
+4. Unzip the folder on your computer
+5. Open VS Code, then open that unzipped folder (File → Open Folder)
+
+**Option B — Clone with Git (if you have Git installed):**
+```
+git clone https://github.com/rfingerlin9284/live_lean_pheonix.git
+```
+
+Once you have the folder open in VS Code, follow the steps in [SETUP_INSTRUCTIONS.md](SETUP_INSTRUCTIONS.md) to rebuild the full trading system.
+
+---
+
 ## Start Here — Three Documents
 
 ### 1. [SETUP_INSTRUCTIONS.md](SETUP_INSTRUCTIONS.md)
