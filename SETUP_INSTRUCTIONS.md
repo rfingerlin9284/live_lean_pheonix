@@ -38,14 +38,33 @@ The code comes entirely from your existing GitHub repositories. Nothing new is b
 
 ---
 
-## Step 1 — Open VS Code
+## Step 1 — Download the Code and Open VS Code
 
-Open VS Code on your new computer. If you do not have it yet:
+### Download the code first
 
-- **Windows or Mac:** Download it from **code.visualstudio.com** and run the installer.
-- **Linux:** See the detailed Linux install steps in [GITHUB_BASICS.md](GITHUB_BASICS.md) — it covers Ubuntu, Debian, Fedora, and all other common Linux distributions with exact commands.
+The instruction files you are reading right now live in the `main` branch of the repository. But the **actual trading system code** you need is in the **`master` branch**.
 
-**Not sure how to download the files from GitHub first?** See [GITHUB_BASICS.md](GITHUB_BASICS.md) for a plain-English guide on downloading this repository as a ZIP file, and for explanations of GitHub terms like "commits ahead" and "branches".
+**Click this link to download everything you need as a ZIP file:**
+
+> **https://github.com/rfingerlin9284/live_lean_pheonix/archive/refs/heads/master.zip**
+
+After downloading:
+1. Find the ZIP file in your Downloads folder
+2. Right-click it and choose "Extract" or "Extract All"
+3. You will get a folder called `live_lean_pheonix-master` — this has all the code
+   (Note: the repository name uses "pheonix" — that is the intentional spelling used in this project)
+
+### Install VS Code if you don't have it
+
+- **Windows or Mac:** Download from **code.visualstudio.com** and run the installer.
+- **Linux:** See the step-by-step Linux install guide in [GITHUB_BASICS.md](GITHUB_BASICS.md) — covers Ubuntu, Debian, Fedora, and all other common Linux distributions.
+
+### Open the folder in VS Code
+
+1. Open VS Code
+2. Click **File → Open Folder**
+3. Browse to and select the `live_lean_pheonix-master` folder you extracted
+4. Click **Open**
 
 ---
 

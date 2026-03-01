@@ -2,6 +2,14 @@
 
 **Written for someone who is new to GitHub. No coding knowledge required.**
 
+## ⚠️ IMPORTANT — This Repository Has Two Key Branches
+
+**The `main` branch** (what you see by default) only has **the instruction documents** — the setup guides and the agent prompt. That is all that is supposed to be here.
+
+**The `master` branch** has the **actual trading system code** — all the Python strategy files, broker connectors, wolf pack files, shell scripts, and everything else the VS Code agent needs to work with.
+
+**You need to download the `master` branch, not `main`.** The download instructions below show you exactly how to get the right one.
+
 ---
 
 ## What Is GitHub?
@@ -47,16 +55,23 @@ A request to merge (combine) changes from one branch into another branch.
 
 ## How to Download the Files From This Repository
 
-You do **not** need to understand branches or commits to download the files. Here are two easy ways:
+**You need the `master` branch** — that is where all the actual code lives. Here are two easy ways to get it:
 
-### Option A — Download Everything as a ZIP File (Easiest)
+### Option A — Download the `master` Branch as a ZIP File (Easiest — Do This One)
 
-1. Go to the repository page on GitHub: `https://github.com/rfingerlin9284/live_lean_pheonix` (note: the repository name has "pheonix" spelled that way — use it exactly as shown)
+**Direct download link — click this to get the ZIP immediately:**
+
+> **https://github.com/rfingerlin9284/live_lean_pheonix/archive/refs/heads/master.zip**
+
+Just click that link in your browser and the ZIP will start downloading automatically. No GitHub account needed.
+
+Or manually:
+1. Go to: `https://github.com/rfingerlin9284/live_lean_pheonix/tree/master`
 2. Click the green **"Code"** button near the top right of the file list
 3. In the dropdown that appears, click **"Download ZIP"**
 4. A ZIP file will download to your computer
 5. Find the ZIP file in your Downloads folder and extract (unzip) it
-6. You now have all the files on your computer — no GitHub knowledge needed
+6. You now have all the code files on your computer
 
 ### Option B — View and Copy Individual Files
 
@@ -134,25 +149,40 @@ After that, follow the instructions in [SETUP_INSTRUCTIONS.md](SETUP_INSTRUCTION
 
 ---
 
-## What Are the 19 Branches?
+## What Are All These Branches?
 
-When you see multiple branches in this repository, they are different versions or working copies of the files. **You do not need to download or use all of them.** The files you need are all in the **main** branch (the default view when you visit the repository page).
+This repository has around 19 branches. Here is what the most important ones are:
 
-To make sure you are on the main branch:
-1. On the GitHub repository page, look for a button near the top left that shows a branch name
-2. Click it and select **main** from the list
-3. Now the files shown are the main, stable version
+| Branch name | What it contains |
+|---|---|
+| **`master`** | ✅ **The full trading system code** — strategies, brokers, wolf packs, scripts. **This is the one you need.** |
+| **`main`** | 📄 Only the instruction/documentation files (like this one). No code here. |
+| `feature/core-engines` | An older working copy of the code, same as master |
+| `worktree-2025-12-*` | Automatic snapshots taken at specific points in time |
+| `copilot/*` | Branches where the GitHub Copilot AI assistant made changes |
+| `archive/*` | Old versions kept for reference |
+
+**The short answer: download `master`. Ignore all the other branches.**
+
+To switch to the `master` branch while browsing on GitHub:
+1. On the GitHub repository page, look for a button near the top left that shows the current branch name (it probably says `main`)
+2. Click that button
+3. A dropdown will appear — click **master**
+4. Now the file list shows all the code
+
+Or just use the direct ZIP download link above and skip the branch switching entirely.
 
 ---
 
 ## Summary — What You Actually Need to Do
 
-1. **Download VS Code** for Linux using the instructions above
-2. **Download the files** from this repository using the ZIP download method
-3. **Extract the ZIP** and open the folder in VS Code
-4. **Follow [SETUP_INSTRUCTIONS.md](SETUP_INSTRUCTIONS.md)** step by step
+1. **Download the `master` branch ZIP** using the direct link above: `https://github.com/rfingerlin9284/live_lean_pheonix/archive/refs/heads/master.zip`
+2. **Extract the ZIP** — you will get a folder called `live_lean_pheonix-master`
+3. **Download VS Code** for Linux using the instructions above (or from code.visualstudio.com)
+4. **Open the extracted folder** in VS Code
+5. **Follow [SETUP_INSTRUCTIONS.md](SETUP_INSTRUCTIONS.md)** step by step
 
-You do not need to understand branches, commits, or any other GitHub concepts to get started. The ZIP download gives you everything you need.
+You do not need to understand branches, commits, or any other GitHub concepts to get started. The single ZIP download link above gives you everything you need.
 
 ---
 
